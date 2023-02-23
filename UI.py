@@ -1,5 +1,5 @@
+import time
 import PySimpleGUI as sg
-from datetime import datetime 
 
 def main_page(name):
     sg.theme('LightGray1')  #Can change theme https://www.geeksforgeeks.org/themes-in-pysimplegui/
@@ -9,11 +9,9 @@ def main_page(name):
     names = name #Name of the employee logging in, passed in as argument of function
     
     layout = [
-        [sg.Text(fileName,font = font,),sg.Text(datetime.now().strftime('%H:%M:%S'),font = font,pad = (200,0)),sg.Text(names,font = font,pad = ((20,0),(0,0)))],      
+        [sg.Text(fileName,font = font,),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],      
         #File name on top left, Time in the center, and employee name at the right
         #Employee Name is blank before anyone logs in
-        
-        #TODO: Time does not update in real time                                                                                   
         [sg.Text('',size = (0,15))],
         #Empty Line for Spacing
         [sg.Button('Loading/Unloading',size=(10,2),pad = ((50,0),(0,0)),font = font), sg.Button('Balancing',pad = ((125,0),(0,0)),size=(10,2.5),font = font)],
@@ -23,9 +21,10 @@ def main_page(name):
         #Comments button on the bottom left, Log in button on the bottom right
     ]
 
-    window = sg.Window('Main page', layout, size=(900, 700))
+    window = sg.Window('Main page', layout, size=(900, 700),finalize = True)
+    
     while True:
-        event, values = window.read()
+        event, values = window.read(timeout=10) #Timeout is required for updating clock
         if event == 'Login': #Employee clicks Login button
             window.close()
             signin_page()
@@ -34,6 +33,7 @@ def main_page(name):
             comments_page(name)
         elif event == sg.WIN_CLOSED: #Employee clicks the X on the program
             exit()
+        window['time'].update(time.strftime('%H:%M:%S')) #Update clock in real time (Military time, local time)
             
         #TODO: Add implementation and pages for Loading/Unloading Buttons and Balancing Button
     
@@ -68,6 +68,7 @@ def comments_page(name):
     event, values = window.read()
     window.close() 
     main_page(name)   #Open the main page after closing the comments page, passing in the name typed in as argument
+    #TODO: Add variable to store the comments made
     
 def main():
     main_page('') #First open main page with no employee name
