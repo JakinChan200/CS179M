@@ -1,0 +1,40 @@
+<!Doctype HTML>
+<html>
+    <head>
+        <title>Bruh</title>
+        <link rel="stylesheet" href="style.css"/>
+        <script src="script.js">   </script>
+    </head>
+    <body>
+        <!-- <nav>
+            <ul>
+                <li>Home</li>
+                <li>About</li>
+        </nav> -->
+        <div class="header">
+            <div id="shipName">Canardll.txt</div>
+            <!-- <div id="time">time</div> -->
+            <!-- <h1> Time is <span id="time"> </span></h1> -->
+            <div id="datetime"></div>
+            <script>
+                function time(){
+                    var dt = new Date();
+                    document.getElementById("datetime").innerHTML = dt.toLocaleTimeString();
+                }    
+                setInterval(time, 1000);
+            </script>            
+
+            <div id="name">Ash</div>
+        </div>
+        <section>
+            <div id="logo">
+                <a id="loadingUnloading">Loading/Unloading</a>
+                <a id="Balancing">Balancing</a>
+            </div>
+        </section>
+        <div class="footer">
+            <a id="Comments" href="index.html">Comments</a>
+            <a id="login" href="index.html">Login</a>
+        </div>
+    </body> 
+</html>
