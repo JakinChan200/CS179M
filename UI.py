@@ -90,11 +90,10 @@ def unloading_loading_page(names,fileName):
     font = ('Arial',30)
     
     layout = [
-    [sg.Text(fileName,font = font,),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],      
-    [sg.Text('',size = (0,15))],
-    [sg.Text('',size = (0,15))], 
-    #TODO add graphics and clickable boxes
-    [sg.Text('',size = (0,15))],
+    [sg.Text(fileName,font = font),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],      
+    [sg.Text('',size = (0,3))],
+    [[sg.B('',size=(3,1.125),pad = (0.1,0), key=(i,j)) for i in range (8)] for j in range(12)],
+    [sg.Text('',size = (0,3))],
     [sg.Button('Comments',size=(10,2),font = ('Arial',14)), sg.Button('Done',pad = (200,0),size = (10,2),font = ('Arial',14)),sg.Button('Login',size=(10,2),font = ('Arial',14))]
     ]
     
@@ -119,11 +118,10 @@ def balancing_page(names,fileName):
     font = ('Arial',30)
     
     layout = [
-    [sg.Text(fileName,font = font,),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],      
-    [sg.Text('',size = (0,15))],
-    [sg.Text('',size = (0,15))], 
-    #TODO add graphics and clickable boxes
-    [sg.Text('',size = (0,15))],
+    [sg.Text(fileName,font = font),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],      
+    [sg.Text('',size = (0,3))],
+    [[sg.B('',size=(3,1.125),pad = (0.1,0), key=(i,j)) for i in range (8)] for j in range(12)],
+    [sg.Text('',size = (0,3))],
     [sg.Button('Comments',size=(10,2),font = ('Arial',14)), sg.Button('Done',pad = (200,0),size = (10,2),font = ('Arial',14)),sg.Button('Login',size=(10,2),font = ('Arial',14))]
     ]
     
