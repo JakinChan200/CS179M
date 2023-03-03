@@ -12,11 +12,13 @@ class Container(NamedTuple):
 
 
 def openFile():
-    filepath = filedialog.askopenfilename(initialdir="/Users/lizbethareizaga/Documents/CS179/CS179M",
-                                            title="Select manifest file.")
+    global file
+    filepath = filedialog.askopenfilename(initialdir="./", title="Select manifest file.")
     file = open(filepath, 'r') #'r' reads text
-    print(readFile(file))
     file.close()
+    
+def getFileName():
+    return os.path.basename(file.name)
 
 '''readFile(file)
         Inputs: text file -- manifest that contains information about containers on ships
@@ -42,8 +44,3 @@ def readFile(file):
         Containers.append(currContainer)
     return Containers
 
-window = Tk()
-window.geometry("700x900")
-button = Button(text="Open", command=openFile)
-button.pack()
-window.mainloop()

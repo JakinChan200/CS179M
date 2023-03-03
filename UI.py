@@ -1,5 +1,7 @@
 import time
+from readManifest import *
 import PySimpleGUI as sg
+
 
 logfile = "Logfile_2022.txt" #temp var-- change to ask file name when program starts
 
@@ -10,11 +12,11 @@ def writeToLog (fileName, comment):
     file.write('\n')
     file.close()
 
-def main_page(name):
-    sg.theme('LightGray1')  #Can change theme https://www.geeksforgeeks.org/themes-in-pysimplegui/
-    font = ('Arial', 30)
 
-    fileName = 'CanardII.txt' #Change later to read in manifest name
+def main_page(name, fileName):
+    sg.theme('LightGray1')  #Can change theme https://www.geeksforgeeks.org/themes-in-pysimplegui/
+    font = ('Arial', 30)   
+      
     names = name #Name of the employee logging in, passed in as argument of function
 
     layout = [
@@ -24,9 +26,11 @@ def main_page(name):
         [sg.Text('',size = (0,15))],
         #Empty Line for Spacing
         [sg.Button('Loading/Unloading',size=(10,2),pad = ((50,0),(0,0)),font = font), sg.Button('Balancing',pad = ((125,0),(0,0)),size=(10,2.5),font = font)],
+         ##NOTE If ship name is long the title gets messed up
+         
         #Loading and Unloading button the left, Balancing button on the right
         [sg.Text('',size = (0,15))],
-        [sg.Button('Comments',size=(10,2),font = ('Arial',14)), sg.Button('Login',pad = ((550,0),(0,0)),size=(10,2),font = ('Arial',14))]
+        [sg.Button('Comments',size=(10,2),font = ('Arial',14)), sg.Button('Upload',pad = (200,0),size = (10,2),font = ('Arial',14)),sg.Button('Login',size=(10,2),font = ('Arial',14))]
         #Comments button on the bottom left, Log in button on the bottom right
     ]
 
@@ -46,11 +50,19 @@ def main_page(name):
         elif event == 'Balancing': #Employee clicks Balancing button
             window.close()
             balancing_page(name,fileName)
+        elif event == 'Upload': #Employee clicks Upload to upload manifest
+            window.close()
+            upload_file(name)
         elif event == sg.WIN_CLOSED: #Employee clicks the X on the program
             exit()
         window['time'].update(time.strftime('%H:%M:%S')) #Update clock in real time (Military time, local time)
 
     window.close()
+    
+def upload_file(name):
+    openFile()
+    main_page(name,getFileName())
+        
 
 def signin_page(name, fileName, function_call): #function_call tells which function is calling this function
     sg.theme('LightGray1')  #Can change theme https://www.geeksforgeeks.org/themes-in-pysimplegui/
@@ -66,7 +78,7 @@ def signin_page(name, fileName, function_call): #function_call tells which funct
     event, values = window.read()
     window.close()
     if function_call == 'main':
-        main_page(values[0]) #Open the main page after closing the sign in page, passing in the name typed in as argument
+        main_page(values[0],fileName) #Open the main page after closing the sign in page, passing in the name typed in as argument
     elif function_call == 'load unload':
         unloading_loading_page(values[0],fileName)
     elif function_call == 'balance':
@@ -89,7 +101,7 @@ def comments_page(name, fileName,function_call): #function_call tells which func
     comment = values[0]
     writeToLog(logfile, comment)
     if function_call == 'main':
-        main_page(name)   #Open the main page after closing the comments page, passing in the name typed in as argument
+        main_page(name, fileName)   #Open the main page after closing the comments page, passing in the name typed in as argument
     elif function_call == 'load unload':
         unloading_loading_page(name,fileName)
     elif function_call == 'balance':
@@ -156,7 +168,6 @@ def balancing_page(names,fileName):
 
 
 def main():
-    main_page('') #First open main page with no employee name
-
+    main_page('','') #First open main page with no employee name and no file name
 if __name__ == '__main__':
     main()
