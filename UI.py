@@ -1,4 +1,5 @@
 import time
+import datetime as dt
 from readManifest import *
 import PySimpleGUI as sg
 
@@ -6,8 +7,9 @@ import PySimpleGUI as sg
 logfile = "Logfile_2022.txt" #temp var-- change to ask file name when program starts
 
 def writeToLog (fileName, comment):
+    date = dt.datetime.now()
     file = open(fileName, 'a')
-    file.write(time.strftime('%H:%M:%S') + ' ' )
+    file.write(date.strftime('%B %d, %Y') + ": " + time.strftime('%H:%M:%S') + ' ' )
     file.write(comment)
     file.write('\n')
     file.close()
@@ -15,8 +17,8 @@ def writeToLog (fileName, comment):
 
 def main_page(name, fileName):
     sg.theme('LightGray1')  #Can change theme https://www.geeksforgeeks.org/themes-in-pysimplegui/
-    font = ('Arial', 30)   
-      
+    font = ('Arial', 30)
+
     names = name #Name of the employee logging in, passed in as argument of function
 
     layout = [
@@ -27,7 +29,7 @@ def main_page(name, fileName):
         #Empty Line for Spacing
         [sg.Button('Loading/Unloading',size=(10,2),pad = ((50,0),(0,0)),font = font), sg.Button('Balancing',pad = ((125,0),(0,0)),size=(10,2.5),font = font)],
          ##NOTE If ship name is long the title gets messed up
-         
+
         #Loading and Unloading button the left, Balancing button on the right
         [sg.Text('',size = (0,15))],
         [sg.Button('Comments',size=(10,2),font = ('Arial',14)), sg.Button('Upload',pad = (200,0),size = (10,2),font = ('Arial',14)),sg.Button('Login',size=(10,2),font = ('Arial',14))]
@@ -58,11 +60,11 @@ def main_page(name, fileName):
         window['time'].update(time.strftime('%H:%M:%S')) #Update clock in real time (Military time, local time)
 
     window.close()
-    
+
 def upload_file(name):
     openFile()
     main_page(name,getFileName())
-        
+
 
 def signin_page(name, fileName, function_call): #function_call tells which function is calling this function
     sg.theme('LightGray1')  #Can change theme https://www.geeksforgeeks.org/themes-in-pysimplegui/
@@ -77,6 +79,8 @@ def signin_page(name, fileName, function_call): #function_call tells which funct
     window = sg.Window('Sign In Page', layout)
     event, values = window.read()
     window.close()
+    loginName = values[0] + " signs in"
+    writeToLog(logfile, loginName)
     if function_call == 'main':
         main_page(values[0],fileName) #Open the main page after closing the sign in page, passing in the name typed in as argument
     elif function_call == 'load unload':
