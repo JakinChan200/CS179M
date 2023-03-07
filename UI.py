@@ -14,7 +14,6 @@ def writeToLog (fileName, comment):
     file.write('\n')
     file.close()
 
-
 def main_page(name, fileName):
     sg.theme('LightGray1')  #Can change theme https://www.geeksforgeeks.org/themes-in-pysimplegui/
     font = ('Arial', 30)
@@ -63,6 +62,7 @@ def main_page(name, fileName):
 
 def upload_file(name):
     openFile()
+    writeToLog(logfile,getFileName() + " has been uploaded")
     main_page(name,getFileName())
 
 
@@ -110,7 +110,6 @@ def comments_page(name, fileName,function_call): #function_call tells which func
         unloading_loading_page(name,fileName)
     elif function_call == 'balance':
         balancing_page(name,fileName)
-    #TODO: Add variable to store the comments made
 
 def unloading_loading_page(names,fileName):
     sg.theme('LightGray1')
@@ -167,8 +166,6 @@ def balancing_page(names,fileName):
 
         #TODO add implementation for done button
     window.close()
-
-
 
 
 def main():
