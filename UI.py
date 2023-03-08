@@ -167,8 +167,42 @@ def balancing_page(names,fileName):
         #TODO add implementation for done button
     window.close()
 
+def success_page(names, fileName):
+    sg.theme('LightGray1')
+    font = ('Arial',30)
+    
+    layout = [
+    [sg.Text(fileName,font = font),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],
+    [sg.Text('',size = (0,5))],
+    [sg.Text('Success! No more moves to make.',size = (0,3), font = ('Arial 25'), pad = (210,0))],
+    [sg.Text('',size = (0,5))],
+    [sg.Text('Please email the manifest file to the captain.',size = (0,3), font = ('Arial 25'),pad = (175,0))],
+    [sg.Text('',size = (0,5))],
+    [sg.Text('The Updated Manifest is available on the Desktop.',size = (0,3), font = ('Arial 25'),pad = (150,0))],
+    [sg.Text('',size = (0,5))],
+    [sg.Button('Comments',size=(10,2),font = ('Arial',14)), sg.Button('Done',pad = (200,0),size = (10,2),font = ('Arial',14)),sg.Button('Login',size=(10,2),font = ('Arial',14))]
+    ]
+
+    window = sg.Window('Balancing Page', layout, size=(900, 700),finalize = True)
+    while True:
+        event, values = window.read(timeout = 10)
+        if event == 'Login': #Employee clicks Login button
+            window.close()
+            signin_page(names, fileName, 'balance')
+        elif event == 'Comments': #Employee clicks Comments button
+            window.close()
+            comments_page(names,fileName,'balance')
+        elif event == sg.WIN_CLOSED: #Employee clicks the X on the program
+            exit()
+        elif event == 'Done':
+            window.close()
+            main_page(names, '')
+        window['time'].update(time.strftime('%H:%M:%S')) #Update clock in real time (Military time, local time)
+
+    window.close()
 
 def main():
-    main_page('','') #First open main page with no employee name and no file name
+#     main_page('','') #First open main page with no employee name and no file name
+    success_page('Ash', 'Login.txt') #Testing Success page
 if __name__ == '__main__':
     main()
