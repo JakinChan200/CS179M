@@ -1,9 +1,11 @@
 # hello_world.py
 
-import PySimpleGUI as sg
 import os.path
 from tkinter import *
 from tkinter import filedialog
+
+import PySimpleGUI
+
 #from tkinter filedialog
 
 def openFile():

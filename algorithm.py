@@ -4,6 +4,7 @@ import heapq
 from dataclasses import dataclass, field
 from typing import Any
 from typing import NamedTuple
+import copy
 # from readManifest import * #Uncomment later and remove container class from this file
 
 # class cell:
@@ -15,46 +16,54 @@ from typing import NamedTuple
 
 #From Other File
 class Container():
-    def __init__(self):
-        self.location = (-1,-1)
-        self.weight = 0
-        self.name = ''
+    def __init__(self, location = (-1, -1), weight = 0, name = ''):
+        self.location = location
+        self.weight = weight
+        self.name = name
+    def printContainer(self):
+        return f"Location: {self.location}, Weight: {self.weight}, Name: {self.name}"
 ###
 
 class Node:
-    def __init__(self):
-        self.ship = []
-        self.buffer = []
-        self.g_n = 0
-        self.h_n = 0
-        self.toLoad = []
-        self.toUnload = []
-        self.currColumn = 0 
-        self.currContainer = Container()
+    def __init__(self, ship = [], buffer = [], g_n = 0, h_n = 0, toLoad = [], toUnload = [], currColumn = 0, currContainer = Container):
+        self.ship = ship
+        self.buffer = buffer
+        self.g_n = g_n
+        self.h_n = h_n
+        self.toLoad = toLoad
+        self.toUnload = toUnload
+        self.currColumn = currColumn
+        self.currContainer = currContainer
     
     def __lt__(self, other):
         return self.g_n + self.h_n < other.g_n + other.h_n
+
+def printList(ship):
+    for i in ship:
+            print(i.__dict__)
+    return
 
 def calH(node):
     return 
 
 #Balancing example
 ship = []
-currContainer = Container((1, 1), 10, '')
-ship.append(currContainer) #Ship[0]
-ship.append(Container((1, 2), 6, ''))
-ship.append(Container((2, 1), 0, 'UNUSED'))
+ship.append(Container((1, 1), 10, '')) #Ship[0]
+ship.append(Container((1, 2), 0, 'UNUSED'))
+ship.append(Container((1, 3), 0, 'UNUSED'))
+ship.append(Container((1, 4), 4, ''))
+ship.append(Container((2, 1), 6, ''))
 ship.append(Container((2, 2), 0, 'UNUSED'))
-ship.append(Container((3, 1), 0, 'UNUSED'))
-ship.append(Container((3, 2), 0, 'UNUSED'))
-ship.append(Container((4, 1), 4, ''))
-ship.append(Container((4, 2), 0, 'UNUSED'))
+ship.append(Container((2, 3), 0, 'UNUSED'))
+ship.append(Container((2, 4), 0, 'UNUSED'))
 
 #print(ship[1].location[0]) #Outputs 1
 
 initialState = Node()
 initialState.ship = ship
-
+print("Original:")
+printList(ship)
+# print(ship[1].printContainer())
 #Looks like this now:
         # 6  |    |    |    |
         # ---------------------
@@ -89,33 +98,45 @@ def checkBalanceGoal(ship):
             rightWeight += cont.weight
     return min(leftWeight, rightWeight)/max(leftWeight, rightWeight) > 0.9
 
+#returns container at the top of the column given
 def return_top_container(currNode,column):
     row = 4  #replace with number of rows in ship
     while row >= 0:
         if currNode.ship[row + (column - 1)].name != 'NAN' and currNode.ship[row + (column - 1)].name != 'UNUSED': #Container name != NAN or UNUSED:
-            return currNode
+            return currNode.ship[row+(column - 1)]
         row = row - 4 
-    emptyNode = Node()
-    return emptyNode
+    emptyContainer = Container()
+    return emptyContainer
 
-print(return_top_container(initialState,1))
-#Should return Container((1, 2), 6, '')
+# testCont = return_top_container(initialState,1)
+# print(testCont.location,testCont.weight, testCont.name)
+# #Should return Container((1, 2), 6, '')
     
 def expand(givenNode, heap):
     column = 1
     while column <= 4: #8 for the puzzle, temp 4
-        currNode = givenNode
+        currNode = copy.deepcopy(givenNode)
+        currNode.currColumn = column
+        #print("Curr Node Ship:")
+        #printList(currNode.ship)
         topContainer = return_top_container(currNode,currNode.currColumn)
-        if len(topContainer.ship) != 0: #we have a top container
-            currNode.currContainer = topContainer
-            nextNode = currNode
-            # nextNode.ship[]
-
-        heapq.heappush(heap,)
+        # print("This is the top container:")
+        # print(topContainer.location,topContainer.weight,topContainer.name)
+        if topContainer.location != (-1,-1): #if container is found
+            newNode = copy.deepcopy(currNode)
+            newNode.currContainer = topContainer
+            #currNode.ship[(row - 1)* column - 1]
+            newNode.ship[(topContainer.location[0] - 1)* 4 + (topContainer.location[1] - 1)].name = "UNUSED" 
+            newNode.ship[(topContainer.location[0] - 1)* 4 + (topContainer.location[1] - 1)].weight = 0
+            #print("New:")
+            #printList(newNode.ship)
+            heapq.heappush(heap,newNode)
         column = column + 1
-# heap = []
-# heapq.heapify(heap)
-# expand(initialState,heap)
+    #print("Given Node:")
+    #printList(givenNode.ship)
+#heap = [] 
+#heapq.heapify(heap)
+#expand(initialState,heap)
 
 def balance(initialState):
     if not is_solvable(initialState):
@@ -130,6 +151,9 @@ def balance(initialState):
         currState = heapq.heappop(heap)
         if len(currState.buffer) == 0 and len(currState.toLoad) == 0 and len(currState.toUnload) == 0:
             return currState
+        else:
+            #expand node
+            expand(currState, heap)
         #apply operators and add new nodes to heap
         # move to column left
         # move to column right
