@@ -25,7 +25,7 @@ class Container():
 ###
 
 class Node:
-    def __init__(self, ship = [], buffer = [], g_n = 0, h_n = 0, toLoad = [], toUnload = [], currColumn = 0, currContainer = Container):
+    def __init__(self, ship = [], buffer = [], g_n = 0, h_n = 0, toLoad = [], toUnload = [], currColumn = 0, currContainer = Container()):
         self.ship = ship
         self.buffer = buffer
         self.g_n = g_n
@@ -82,11 +82,11 @@ printList(ship)
 def is_solvable(initialState):
     sum = 0.0
     maxW = 0.0
-    for cont in initialState:
+    for cont in initialState.ship:
         sum += cont.weight
         if(cont.weight > maxW):
             maxW = cont.weight
-    return sum > maxW*10
+    return (sum-maxW) >= maxW*0.9
 
 def checkBalanceGoal(ship):
     leftWeight = 0
@@ -96,17 +96,30 @@ def checkBalanceGoal(ship):
             leftWeight += cont.weight
         else:
             rightWeight += cont.weight
+    if leftWeight + rightWeight == 0:
+        return True
+    elif max(leftWeight, rightWeight == 0):
+        return False 
     return min(leftWeight, rightWeight)/max(leftWeight, rightWeight) > 0.9
 
 #returns container at the top of the column given
+# def return_top_container(currNode,column):
+#     row = 4  #replace with number of rows in ship
+#     while row >= 0:
+#         if currNode.ship[row + (column - 1)].name != 'NAN' and currNode.ship[row + (column - 1)].name != 'UNUSED': #Container name != NAN or UNUSED:
+#             return currNode.ship[row+(column - 1)]
+#         row = row - 4 
+#     emptyContainer = Container()
+#     return emptyContainer
+
+#returns container at the top of the column given -- mod
 def return_top_container(currNode,column):
     row = 4  #replace with number of rows in ship
     while row >= 0:
         if currNode.ship[row + (column - 1)].name != 'NAN' and currNode.ship[row + (column - 1)].name != 'UNUSED': #Container name != NAN or UNUSED:
             return currNode.ship[row+(column - 1)]
-        row = row - 4 
-    emptyContainer = Container()
-    return emptyContainer
+        row = row - 4     
+    return currNode.ship[row+(column - 1)]
 
 # testCont = return_top_container(initialState,1)
 # print(testCont.location,testCont.weight, testCont.name)
@@ -114,29 +127,64 @@ def return_top_container(currNode,column):
     
 def expand(givenNode, heap):
     column = 1
-    while column <= 4: #8 for the puzzle, temp 4
+    maxCol = 4
+    while column <= maxCol: #8 for the puzzle, temp 4
         currNode = copy.deepcopy(givenNode)
         currNode.currColumn = column
-        #print("Curr Node Ship:")
-        #printList(currNode.ship)
-        topContainer = return_top_container(currNode,currNode.currColumn)
-        # print("This is the top container:")
-        # print(topContainer.location,topContainer.weight,topContainer.name)
-        if topContainer.location != (-1,-1): #if container is found
+        emptyContainer = Container()
+        if currNode.currContainer.location != (-1,-1): #need to pick up
+            # print(currNode.currContainer.name, currNode.currContainer.weight, currNode.currContainer.location )
+            #print("Curr Node Ship:")
+            #printList(currNode.ship)
+            topContainer = return_top_container(currNode,currNode.currColumn)
+            # print("This is the top container:")
+            # print(topContainer.location,topContainer.weight,topContainer.name)
+            if topContainer.name != 'NAN' or topContainer.name != 'UNUSED': #if container is found
+                newNode = copy.deepcopy(currNode)
+                newNode.currContainer = topContainer
+                #currNode.ship[(row - 1)* column - 1]
+                newNode.ship[(topContainer.location[0] - 1)* maxCol + (topContainer.location[1] - 1)].name = "UNUSED" 
+                newNode.ship[(topContainer.location[0] - 1)* maxCol + (topContainer.location[1] - 1)].weight = 0
+                #print("New:")
+                #printList(newNode.ship)
+                heapq.heappush(heap,newNode)
+        else: #need to put down
+        #get the currContainer from currNode currNode.currContainer
             newNode = copy.deepcopy(currNode)
-            newNode.currContainer = topContainer
-            #currNode.ship[(row - 1)* column - 1]
-            newNode.ship[(topContainer.location[0] - 1)* 4 + (topContainer.location[1] - 1)].name = "UNUSED" 
-            newNode.ship[(topContainer.location[0] - 1)* 4 + (topContainer.location[1] - 1)].weight = 0
-            #print("New:")
-            #printList(newNode.ship)
-            heapq.heappush(heap,newNode)
+            topContainer = return_top_container(currNode,currNode.currColumn)
+            if topContainer.name != 'UNUSED': #put it in cell above
+                if topContainer.location[0] < 2:
+                    newNode.ship[(topContainer.location[0])* maxCol + (topContainer.location[1] - 1)] = copy.deepcopy(newNode.currContainer)
+                    # newNode.ship[(topContainer.location[0])* maxCol + (topContainer.location[1] - 1)].name = newNode.currContainer.name
+                    # newNode.ship[(topContainer.location[0])* maxCol + (topContainer.location[1] - 1)].weight = newNode.currContainer.weight
+                    # newNode.ship[(topContainer.location[0])* maxCol + (topContainer.location[1] - 1)].location = newNode.currContainer.location
+                    newNode.currContainer.location = (-1,-1)
+                    newNode.currContainer.name = ''
+                    newNode.currContainer.weight = 0
+                    print("New:")
+                    printList(newNode.ship)
+                    heapq.heappush(heap,newNode)
+            else: #put it at UNUSED location
+                newNode.ship[(topContainer.location[0] - 1)* maxCol + (topContainer.location[1] - 1)] = copy.deepcopy(newNode.currContainer)
+                # newNode.ship[(topContainer.location[0] - 1)* maxCol + (topContainer.location[1] - 1)]= copy
+                # newNode.ship[(topContainer.location[0] - 1)* maxCol + (topContainer.location[1] - 1)].weight = newNode.currContainer.weight
+                # newNode.ship[(topContainer.location[0] - 1)* maxCol + (topContainer.location[1] - 1)].location = newNode.currContainer.location
+                newNode.currContainer.location = (-1,-1)
+                newNode.currContainer.name = ''
+                newNode.currContainer.weight = 0
+                print("New:")
+                printList(newNode.ship)
+                heapq.heappush(heap,newNode)
+            #check for repeated states
+
         column = column + 1
     #print("Given Node:")
     #printList(givenNode.ship)
-#heap = [] 
-#heapq.heapify(heap)
-#expand(initialState,heap)
+heap = [] 
+heapq.heapify(heap)
+expand(initialState,heap)
+currState = heapq.heappop(heap)
+expand(currState, heap)
 
 def balance(initialState):
     if not is_solvable(initialState):
@@ -149,7 +197,7 @@ def balance(initialState):
         if (len(heap) == 0):
             return "Failure"
         currState = heapq.heappop(heap)
-        if len(currState.buffer) == 0 and len(currState.toLoad) == 0 and len(currState.toUnload) == 0:
+        if checkBalanceGoal(currState.ship):
             return currState
         else:
             #expand node
@@ -158,8 +206,12 @@ def balance(initialState):
         # move to column left
         # move to column right
         # move to buffer
-        # move from bufffer to smaller side
+        # move from buffer to smaller side
 
+# temp = balance(initialState)
+# print(temp)
+# print("New:")
+# printList(temp.ship)
 #q.push(Node(moveRight(currentPuzzle, blankPosition),nodeDepth + 1,calculateMisplacedTile(moveRight(currentPuzzle, blankPosition)) + nodeDepth));
 # temp = swapValues(puzzleTop, row-1, col, "up");
 
