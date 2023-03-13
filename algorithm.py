@@ -9,6 +9,7 @@ import copy
 #global variables
 maxCol = 4
 maxRow = 2
+repeatedStates = [] #holds list of containers (ships)
 # from readManifest import * #Uncomment later and remove container class from this file
 
 # class cell:
@@ -25,7 +26,8 @@ class Container():
         self.weight = weight
         self.name = name
     def printContainer(self):
-        return f"Location: {self.location}, Weight: {self.weight}, Name: {self.name}"
+        return self.weight
+        # return f"Location: {self.location}, Weight: {self.weight}, Name: {self.name}"
 ###
 
 class Node:
@@ -47,6 +49,20 @@ def printList(ship):
             print(i.__dict__)
     return
 
+def printShip(ship):
+    for i in reversed(range(2)):
+        print('\n')
+        for x in range(4):
+            print(str(ship[(i)*4 + (x)].printContainer()) + " ", end = " ")
+    print("\n")
+    return
+
+def printWeights(ship):
+    for i in range(len(ship)):
+        print(str(ship[i].weight) + ", ", end = " ")
+    print("\n")
+    return
+
 def calH(node):
     return 
 
@@ -65,8 +81,8 @@ ship.append(Container((2, 4), 0, 'UNUSED'))
 
 initialState = Node()
 initialState.ship = ship
-print("Original:")
-printList(ship)
+# print("Original:")
+# printList(ship)
 # print(ship[1].printContainer())
 #Looks like this now:
         # 6  |    |    |    |
@@ -92,6 +108,63 @@ def is_solvable(initialState):
             maxW = cont.weight
     return (sum-maxW) >= maxW*0.9
 
+def group_up(lst, var_lst): #https://www.geeksforgeeks.org/python-convert-1d-list-to-2d-list-of-variable-length/
+    idx = 0
+    for var_len in var_lst:
+        yield lst[idx : idx + var_len]
+        idx += var_len
+
+def SIFT(SIFT_ship):       
+    var_lst = []
+    ship = []
+    for container in SIFT_ship:
+        ship.append(container.weight)
+    #divided_ship = [[8,7,6,5],[4,3,2,1]]
+    #new_divided_ship = [[8,7,6,5],[4,3,2,1]]
+    #ship = [8,7,6,5,4,3,2,1]
+    ship.sort(reverse = True) # https://stackoverflow.com/questions/403421/how-do-i-sort-a-list-of-objects-based-on-an-attribute-of-the-objects
+    for i in range(maxRow):
+        var_lst.append(maxCol)
+    divided_ship  = list(group_up(ship,var_lst))
+
+    new_divided_ship = copy.deepcopy(divided_ship)
+
+    ship_pointer = 0
+    nested_index = 0
+    for i in divided_ship: #Each row, Outputs i = [8,7,6,5] and then i = [4,3,2,1]
+        left_pointer = len(i)/2 - 1 #len([8,7,6,5]) / 2  - 1 which is 1
+        right_pointer = len(i)/2 #len([8,7,6,5]) / 2  which is 12
+        while left_pointer >= 0 and right_pointer < len(i):
+
+            new_divided_ship[nested_index][int(left_pointer)] = ship[ship_pointer]
+            left_pointer -= 1
+            ship_pointer += 1
+            
+            new_divided_ship[nested_index][int(right_pointer)] = ship[ship_pointer]
+            right_pointer += 1
+            ship_pointer += 1
+        nested_index += 1
+    new_divided_ship_flattened = sum(new_divided_ship,[]) # https://www.geeksforgeeks.org/python-ways-to-flatten-a-2d-list/
+    return new_divided_ship_flattened
+
+def checkSIFTGoal(ship, goalShip): #goalship = [1,2,3,4,5,6,7,8]
+    for i in range(len(goalShip)):
+        if ship[i].weight != goalShip[i]:
+            return False
+    return True
+# ship = []
+# ship.append(Container((1, 1), 4, '')) #Ship[0]
+# ship.append(Container((1, 2), 10, 'UNUSED'))
+# ship.append(Container((1, 3), 6, ''))
+# ship.append(Container((1, 4), 0, ''))
+# ship.append(Container((2, 1), 0, 'UNUSED'))
+# ship.append(Container((2, 2), 0, 'UNUSED'))
+# ship.append(Container((2, 3), 0, 'UNUSED'))
+# ship.append(Container((2, 4), 0, 'UNUSED'))
+# initialState2 = Node()
+# initialState2.ship = ship
+# print(checkSIFTGoal(ship,SIFT(ship)))
+    
 def checkBalanceGoal(ship):
     leftWeight = 0
     rightWeight = 0
@@ -104,7 +177,7 @@ def checkBalanceGoal(ship):
         return True
     #elif max(leftWeight, rightWeight) == 0:
         #return False
-    return min(leftWeight, rightWeight)/max(leftWeight, rightWeight) > 0.9
+    return min(leftWeight, rightWeight)/max(leftWeight, rightWeight) >= 0.9
 
 #returns container at the top of the column given
 # def return_top_container(currNode,column):
@@ -125,17 +198,29 @@ def return_top_container(currNode,column):
         index = index - 4   #change according to ship size
     return currNode.ship[index+(column - 1)]
 
-ship = []
-ship.append(Container((1, 1), 10, '')) #Ship[0]
-ship.append(Container((1, 2), 0, 'UNUSED'))
-ship.append(Container((1, 3), 6, ''))
-ship.append(Container((1, 4), 4, ''))
-ship.append(Container((2, 1), 0, 'UNUSED'))
-ship.append(Container((2, 2), 0, 'UNUSED'))
-ship.append(Container((2, 3), 0, 'UNUSED'))
-ship.append(Container((2, 4), 0, 'UNUSED'))
-initialState2 = Node()
-initialState2.ship = ship
+def doSIFT(initialState):
+    currState = Node()
+    heap = []
+    heapq.heapify(heap)
+    heapq.heappush(heap,initialState)
+    repeatedStates.append(initialState.ship)
+
+    # currIt = 0
+    SIFTvalue = SIFT(initialState.ship)
+    while True:
+        currState = heapq.heappop(heap)
+        #printWeights(currState.ship)
+        # print("State:")
+        # printList(currState.ship)
+        if checkSIFTGoal(currState.ship,SIFTvalue):
+            # print("G_N:")
+            # print(currState.g_n)
+            return currState
+        else:
+            #expand node
+            expand(currState, heap)
+    
+
 # print(checkBalanceGoal(initialState2.ship))
 # print("Original:")
 # printList(ship)
@@ -159,6 +244,30 @@ def return_top_available_cell_location(currNode,column):
 # print(testCont.location,testCont.weight, testCont.name)
 # #Should return Container((1, 2), 6, '')
     
+def exists(ship):
+    for list_of_containers in repeatedStates:
+        counter = 0
+        same = True
+        for container in list_of_containers:
+            if not container.name == ship[counter].name:
+                # print(container.name, ship[counter].name)
+                same = False
+                break
+            counter += 1
+        if same:
+            # print("True")
+            return True
+        # print("end of inner loop ", counter)
+    # print("False")
+    return False
+    # for list_of_containers in repeatedStates: #iterates through ships in repeates states
+    #     for containers in ship:        
+    #         for container in list_of_containers: #iterates through containers in current ship from repeated states
+    #             print(container.name, containers.name)
+    #             if container.name == containers.name:
+    #                 return True
+    # return False
+
 def expand(givenNode, heap):
     column = 1
     while column <= maxCol: #8 for the puzzle, temp 4
@@ -200,12 +309,18 @@ def expand(givenNode, heap):
                     newNode.currContainer = emptyContainer
                     innerColumn = innerColumn + 1
 
+                    # print(len(repeatedStates))
                     nodeToPush = copy.deepcopy(newNode)
                     # print("New:")
                     # printList(nodeToPush.ship)
                     # print("Curr container: ")
                     # print(nodeToPush.currContainer.name, nodeToPush.currContainer.weight, nodeToPush.currContainer.location )
-                    heapq.heappush(heap,nodeToPush) 
+                    # if any(x == nodeToPush.ship for x in repeatedStates):#https://stackoverflow.com/questions/9371114/check-if-list-of-objects-contain-an-object-with-a-certain-attribute-value
+                    if not exists(nodeToPush.ship): 
+                        print("New:")
+                        printShip(nodeToPush.ship)   
+                        heapq.heappush(heap,nodeToPush) 
+                        repeatedStates.append(nodeToPush.ship)
                     newNode.ship[(tempLocation[0] - 1)* maxCol + (tempLocation[1] - 1)].name = "UNUSED" 
                     newNode.ship[(tempLocation[0] - 1)* maxCol + (tempLocation[1] - 1)].weight = 0
 
@@ -230,11 +345,12 @@ def expand(givenNode, heap):
 
 def balance(initialState):
     if not is_solvable(initialState):
-        return "Not Solvable"
+        return doSIFT(initialState)
     currState = Node()
     heap = []
     heapq.heapify(heap)
     heapq.heappush(heap,initialState)
+    repeatedStates.append(initialState.ship)
     # currIt = 0
     while True:
         # print("iteration",currIt)
@@ -245,6 +361,7 @@ def balance(initialState):
         # print("State:")
         # printList(currState.ship)
         if checkBalanceGoal(currState.ship):
+            # print(currState.g_n)
             return currState
         else:
             #expand node
@@ -258,13 +375,52 @@ def balance(initialState):
         # move to column right
         # move to buffer
         # move from buffer to smaller side
-
-temp = balance(initialState)
+ship = []
+ship.append(Container((1, 1), 0, 'Bob')) #Ship[0]
+ship.append(Container((1, 2), 0, 'UNUSED'))
+ship.append(Container((1, 3), 7, 'Bob3'))
+ship.append(Container((1, 4), 3, 'Bob4'))
+ship.append(Container((2, 1), 0, 'UNUSED'))
+ship.append(Container((2, 2), 0, 'UNUSED'))
+ship.append(Container((2, 3), 2, 'Bob5'))
+ship.append(Container((2, 4), 2, 'Bob6'))
+initialState3 = Node()
+initialState3.ship = ship
+print("Original:")
+printShip(ship)
+# test = (0,100,10,0,0,1,0,0)
+# print(checkSIFTGoal(ship,test))
+#repeatedStates.append(initialState.ship)
+# repeatedStates.append(initialState3.ship)
+# exists(initialState.ship)
+temp = balance(initialState3)
 if temp == "Failure":
     print(temp)
 else:
     print("Solved:")
+    printShip(temp.ship)
     printList(temp.ship)
+
+###############################################################
+
+
+
+
+# ship = []
+# ship.append(Container((1, 1), 100, '')) #Ship[0]
+# ship.append(Container((1, 2), 9, ''))
+# ship.append(Container((1, 3), 8, ''))
+# ship.append(Container((1, 4), 0, ''))
+# ship.append(Container((2, 1), 0, ''))
+# ship.append(Container((2, 2), 3, ''))
+# ship.append(Container((2, 3), 2, ''))
+# ship.append(Container((2, 4), 1, ''))
+# initialState3 = Node()
+# initialState3.ship = ship
+# print("SIFT:")
+# print(SIFT(ship))
+
+
 
 #q.push(Node(moveRight(currentPuzzle, blankPosition),nodeDepth + 1,calculateMisplacedTile(moveRight(currentPuzzle, blankPosition)) + nodeDepth));
 # temp = swapValues(puzzleTop, row-1, col, "up");
