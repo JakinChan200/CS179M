@@ -1,9 +1,10 @@
-import PySimpleGUI as sg
 import os.path
+import re  # for regex
 from tkinter import *
 from tkinter import filedialog
-import re # for regex
 from typing import NamedTuple
+
+import PySimpleGUI
 
 class Container(NamedTuple):
     location: tuple
