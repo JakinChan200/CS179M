@@ -5,28 +5,22 @@ from dataclasses import dataclass, field
 from typing import Any
 from typing import NamedTuple
 import copy
+from readManifest import * 
+
 
 #global variables
-maxCol = 4
-maxRow = 2
+maxCol = 12
+maxRow = 8
 repeatedStates = [] #holds list of containers (ships)
-# from readManifest import * #Uncomment later and remove container class from this file
-
-# class cell:
-#     def __init__(self, name, weight):
-#         self.name = name
-#         self.weight = weight
-#     def __str__(self):
-#         return self.name + " " + str(self.weight)
 
 #From Other File
-class Container():
-    def __init__(self, location = (-1, -1), weight = 0, name = ''):
-        self.location = location
-        self.weight = weight
-        self.name = name
-    def printContainer(self):
-        return self.weight
+# class Container():
+#     def __init__(self, location = (-1, -1), weight = 0, name = ''):
+#         self.location = location
+#         self.weight = weight
+#         self.name = name
+#     def printContainer(self):
+#         return self.weight
         # return f"Location: {self.location}, Weight: {self.weight}, Name: {self.name}"
 ###
 
@@ -50,10 +44,10 @@ def printList(ship):
     return
 
 def printShip(ship):
-    for i in reversed(range(2)):
+    for i in reversed(range(maxRow)):
         print('\n')
-        for x in range(4):
-            print(str(ship[(i)*4 + (x)].printContainer()) + " ", end = " ")
+        for x in range(maxCol):
+            print(str(ship[(i)*maxCol + (x)].printContainer()) + " ", end = " ")
     print("\n")
     return
 
@@ -67,20 +61,33 @@ def calH(node):
     return 
 
 #Balancing example
-ship = []
-ship.append(Container((1, 1), 10, '')) #Ship[0]
-ship.append(Container((1, 2), 0, 'UNUSED'))
-ship.append(Container((1, 3), 0, 'UNUSED'))
-ship.append(Container((1, 4), 4, ''))
-ship.append(Container((2, 1), 6, ''))
-ship.append(Container((2, 2), 0, 'UNUSED'))
-ship.append(Container((2, 3), 0, 'UNUSED'))
-ship.append(Container((2, 4), 0, 'UNUSED'))
+# ship = []
+# ship.append(Container((1, 1), 10, '')) #Ship[0]
+# ship.append(Container((1, 2), 0, 'UNUSED'))
+# ship.append(Container((1, 3), 0, 'UNUSED'))
+# ship.append(Container((1, 4), 4, ''))
+# ship.append(Container((2, 1), 6, ''))
+# ship.append(Container((2, 2), 0, 'UNUSED'))
+# ship.append(Container((2, 3), 0, 'UNUSED'))
+# ship.append(Container((2, 4), 0, 'UNUSED'))
+# ship = []
+# i = 1
+# while i <= 8:
+#     j = 1
+#     while j <= 12:
+#         ship.append(Container((i,j),0,'UNUSED'))
+#         j+=1
+#     i+=1
+#     
+# ship[0] = Container((1,1),130,'Bob')
+# ship[1] = Container((1,2),20,'Bob2')
+# ship[2] = Container((1,3),50,'Bob3')
+# ship[3] = Container((1,4),20,'Bob4')
 
 #print(ship[1].location[0]) #Outputs 1
 
-initialState = Node()
-initialState.ship = ship
+# initialState = Node()
+# initialState.ship = ship
 # print("Original:")
 # printList(ship)
 # print(ship[1].printContainer())
@@ -113,6 +120,16 @@ def group_up(lst, var_lst): #https://www.geeksforgeeks.org/python-convert-1d-lis
     for var_len in var_lst:
         yield lst[idx : idx + var_len]
         idx += var_len
+
+def ComputeSIFTMisplacedTile(givenNode, goalShip):
+    score = 0
+    currShip = givenNode.ship
+    i = 0
+    while i < maxRow * maxCol:
+        if currShip[i].weight != goalShip[i]:
+            score+=1
+        i+=1
+    return score
 
 def SIFT(SIFT_ship):       
     var_lst = []
@@ -169,7 +186,7 @@ def checkBalanceGoal(ship):
     leftWeight = 0
     rightWeight = 0
     for cont in ship:
-        if(cont.location[1] <= 2): #need to fix this later
+        if(cont.location[1] <= (maxCol/2)): #need to fix this later
             leftWeight += cont.weight
         else:
             rightWeight += cont.weight
@@ -191,11 +208,11 @@ def checkBalanceGoal(ship):
 
 #returns container at the top of the column given -- mod
 def return_top_container(currNode,column):
-    index = 4 #replace with number of top left index
+    index = 84 #replace with number of top left index
     while index >= 0:
         if currNode.ship[index + (column - 1)].name != 'NAN' and currNode.ship[index + (column - 1)].name != 'UNUSED': #Container name != NAN or UNUSED:
             return currNode.ship[index+(column - 1)]
-        index = index - 4   #change according to ship size
+        index = index - maxCol   #change according to ship size
     return currNode.ship[index+(column - 1)]
 
 def doSIFT(initialState):
@@ -218,7 +235,7 @@ def doSIFT(initialState):
             return currState
         else:
             #expand node
-            expand(currState, heap)
+            expand(currState, heap, True)
     
 
 # print(checkBalanceGoal(initialState2.ship))
@@ -226,7 +243,7 @@ def doSIFT(initialState):
 # printList(ship)
 
 def return_top_available_cell_location(currNode,column):
-    index = 4 #replace with number of rows in ship
+    index = 84 
     while index >= 0:
         if currNode.ship[index + (column - 1)].name != 'UNUSED':  #If is NAN or Container
             tempLocation = (currNode.ship[index+(column - 1)].location[0] + 1, currNode.ship[index+(column - 1)].location[1])
@@ -234,7 +251,7 @@ def return_top_available_cell_location(currNode,column):
                 return tempLocation
             else: #Full Column
                 return (-1,-1)
-        index = index - 4     
+        index = index - maxCol
     return (1,column) #Empty Column, return bottom most cell
         
 # testing = return_top_available_cell_location(initialState,1)
@@ -268,7 +285,7 @@ def exists(ship):
     #                 return True
     # return False
 
-def expand(givenNode, heap):
+def expand(givenNode, heap, isSift):
     column = 1
     while column <= maxCol: #8 for the puzzle, temp 4
         emptyContainer = Container()
@@ -317,8 +334,10 @@ def expand(givenNode, heap):
                     # print(nodeToPush.currContainer.name, nodeToPush.currContainer.weight, nodeToPush.currContainer.location )
                     # if any(x == nodeToPush.ship for x in repeatedStates):#https://stackoverflow.com/questions/9371114/check-if-list-of-objects-contain-an-object-with-a-certain-attribute-value
                     if not exists(nodeToPush.ship): 
-                        print("New:")
-                        printShip(nodeToPush.ship)   
+#                         print("New:")
+#                         printShip(nodeToPush.ship)
+                        if isSift:
+                            nodeToPush.h_n = ComputeSIFTMisplacedTile(nodeToPush,SIFT(nodeToPush.ship))   
                         heapq.heappush(heap,nodeToPush) 
                         repeatedStates.append(nodeToPush.ship)
                     newNode.ship[(tempLocation[0] - 1)* maxCol + (tempLocation[1] - 1)].name = "UNUSED" 
@@ -365,7 +384,7 @@ def balance(initialState):
             return currState
         else:
             #expand node
-            expand(currState, heap)
+            expand(currState, heap, False)
             # print(len(heap))
             # print("State After:")
             # printList(currState.ship)
@@ -375,31 +394,32 @@ def balance(initialState):
         # move to column right
         # move to buffer
         # move from buffer to smaller side
-ship = []
-ship.append(Container((1, 1), 0, 'Bob')) #Ship[0]
-ship.append(Container((1, 2), 0, 'UNUSED'))
-ship.append(Container((1, 3), 7, 'Bob3'))
-ship.append(Container((1, 4), 3, 'Bob4'))
-ship.append(Container((2, 1), 0, 'UNUSED'))
-ship.append(Container((2, 2), 0, 'UNUSED'))
-ship.append(Container((2, 3), 2, 'Bob5'))
-ship.append(Container((2, 4), 2, 'Bob6'))
-initialState3 = Node()
-initialState3.ship = ship
-print("Original:")
-printShip(ship)
+# ship = []
+# ship.append(Container((1, 1), 0, 'Bob')) #Ship[0]
+# ship.append(Container((1, 2), 0, 'UNUSED'))
+# ship.append(Container((1, 3), 7, 'Bob3'))
+# ship.append(Container((1, 4), 3, 'Bob4'))
+# ship.append(Container((2, 1), 0, 'UNUSED'))
+# ship.append(Container((2, 2), 0, 'UNUSED'))
+# ship.append(Container((2, 3), 2, 'Bob5'))
+# ship.append(Container((2, 4), 2, 'Bob6'))
+# initialState3 = Node()
+# initialState3.ship = ship
+# print("Original:")
+# printShip(ship)
 # test = (0,100,10,0,0,1,0,0)
 # print(checkSIFTGoal(ship,test))
 #repeatedStates.append(initialState.ship)
 # repeatedStates.append(initialState3.ship)
 # exists(initialState.ship)
-temp = balance(initialState3)
-if temp == "Failure":
-    print(temp)
-else:
-    print("Solved:")
-    printShip(temp.ship)
-    printList(temp.ship)
+
+# temp = balance(initialState)
+# if temp == "Failure":
+#     print(temp)
+# else:
+#     print("Solved:")
+#     printShip(temp.ship)
+#     printList(temp.ship)
 
 ###############################################################
 
@@ -441,4 +461,3 @@ else:
 # include state 4 lists
 # 1 for unload, 1 for load, 1 for ship, 1 for buffer (gaol state is empty load/unload/buffer)
 # include int for number of moves (time) g(n)
-# include heuristic h(n)
