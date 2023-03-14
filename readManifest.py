@@ -5,10 +5,22 @@ from tkinter import filedialog
 import re # for regex
 from typing import NamedTuple
 
+<<<<<<< Updated upstream
 class Container(NamedTuple):
     location: tuple
     weight: int
     name: str
+=======
+import PySimpleGUI
+
+class Container():
+    def __init__(self, location = (-1, -1), weight = 0, name = ''):
+        self.location = location
+        self.weight = weight
+        self.name = name
+    def printContainer(self):
+        return self.weight
+>>>>>>> Stashed changes
 
 
 def openFile():
@@ -17,6 +29,12 @@ def openFile():
     file = open(filepath, 'r') #'r' reads text
     print(readFile(file))
     file.close()
+<<<<<<< Updated upstream
+=======
+
+def getFileName():
+    return os.path.basename(file.name)
+>>>>>>> Stashed changes
 
 '''readFile(file)
         Inputs: text file -- manifest that contains information about containers on ships
@@ -41,9 +59,12 @@ def readFile(file):
         currContainer = Container((x_location, y_location), weight, name)
         Containers.append(currContainer)
     return Containers
+<<<<<<< Updated upstream
 
 window = Tk()
 window.geometry("700x900")
 button = Button(text="Open", command=openFile)
 button.pack()
 window.mainloop()
+=======
+>>>>>>> Stashed changes
