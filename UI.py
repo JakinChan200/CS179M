@@ -14,15 +14,13 @@ def writeToLog (fileName, comment):
     file.write('\n')
     file.close()
 
-
 def main_page(name, fileName):
     sg.theme('LightGray1')  #Can change theme https://www.geeksforgeeks.org/themes-in-pysimplegui/
     font = ('Arial', 30)
 
     names = name #Name of the employee logging in, passed in as argument of function
-
     layout = [
-        [sg.Text(fileName,font = font,),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],
+        [sg.Text(fileName,font = font),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],
         #File name on top left, Time in the center, and employee name at the right
         #Employee Name is blank before anyone logs in
         [sg.Text('',size = (0,15))],
@@ -63,6 +61,7 @@ def main_page(name, fileName):
 
 def upload_file(name):
     openFile()
+    writeToLog(logfile,getFileName() + " has been uploaded")
     main_page(name,getFileName())
 
 
@@ -110,7 +109,6 @@ def comments_page(name, fileName,function_call): #function_call tells which func
         unloading_loading_page(name,fileName)
     elif function_call == 'balance':
         balancing_page(name,fileName)
-    #TODO: Add variable to store the comments made
 
 def unloading_loading_page(names,fileName):
     sg.theme('LightGray1')
@@ -168,10 +166,44 @@ def balancing_page(names,fileName):
         #TODO add implementation for done button
     window.close()
 
+def success_page(names, fileName):
+    sg.theme('LightGray1')
+    font = ('Arial',30)
+    fileName = fileName[:-4]
+    outboundFileName = fileName + '_OUTBOUND.txt'
+    print(outboundFileName)
+    layout = [
+    [sg.Text(fileName,font = font),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],
+    [sg.Text('',size = (0,5))],
+    [sg.Text('Success! No more moves to make.',size = (0,3), font = ('Arial 25'), pad = (210,0))],
+    [sg.Text('',size = (0,5))],
+    [sg.Text('Please email ' + outboundFileName + ' to the captain.',size = (0,3), font = ('Arial 25'),pad = (125,0))],
+    [sg.Text('',size = (0,5))],
+    [sg.Text(outboundFileName + ' is available on the Desktop.',size = (0,3), font = ('Arial 25'),pad = (150,0))],
+    [sg.Text('',size = (0,5))],
+    [sg.Button('Comments',size=(10,2),font = ('Arial',14)), sg.Button('Done',pad = (200,0),size = (10,2),font = ('Arial',14)),sg.Button('Login',size=(10,2),font = ('Arial',14))]
+    ]
 
+    window = sg.Window('Balancing Page', layout, size=(900, 700),finalize = True)
+    while True:
+        event, values = window.read(timeout = 10)
+        if event == 'Login': #Employee clicks Login button
+            window.close()
+            signin_page(names, fileName, 'balance')
+        elif event == 'Comments': #Employee clicks Comments button
+            window.close()
+            comments_page(names,fileName,'balance')
+        elif event == sg.WIN_CLOSED: #Employee clicks the X on the program
+            exit()
+        elif event == 'Done':
+            window.close()
+            main_page(names, '')
+        window['time'].update(time.strftime('%H:%M:%S')) #Update clock in real time (Military time, local time)
 
+    window.close()
 
 def main():
-    main_page('','') #First open main page with no employee name and no file name
+#     main_page('','') #First open main page with no employee name and no file name
+    success_page('Ash', 'Login.txt') #Testing Success page
 if __name__ == '__main__':
     main()
