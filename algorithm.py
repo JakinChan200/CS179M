@@ -89,8 +89,8 @@ ship[3] = Container((1,4),20,'Bob4')
 # ship = openFile()
 initialState = Node()
 initialState.ship = ship
-print("Original:")
-printShip(ship)
+# print("Original:")
+# printShip(ship)
 # print(ship[1].printContainer())
 #Looks like this now:
         # 6  |    |    |    |
@@ -116,11 +116,17 @@ def is_solvable(initialState):
             maxW = cont.weight
     return (sum-maxW) >= maxW*0.9
 
-def group_up(lst, var_lst): #https://www.geeksforgeeks.org/python-convert-1d-list-to-2d-list-of-variable-length/
-    idx = 0
-    for var_len in var_lst:
-        yield lst[idx : idx + var_len]
-        idx += var_len
+def checkBalanceGoal(ship):
+    leftWeight = 0
+    rightWeight = 0
+    for cont in ship:
+        if(cont.location[1] <= (maxCol/2)): #need to fix this later
+            leftWeight += cont.weight
+        else:
+            rightWeight += cont.weight
+    if leftWeight + rightWeight == 0: #Empty Ship or all weights are 0
+        return True
+    return min(leftWeight, rightWeight)/max(leftWeight, rightWeight) >= 0.9
         
 #returns container at the top of the column given -- mod
 def return_top_container(currNode,column):
@@ -130,6 +136,84 @@ def return_top_container(currNode,column):
             return currNode.ship[index+(column - 1)]
         index = index - maxCol   #change according to ship size
     return currNode.ship[index+(column - 1)]
+
+def return_top_available_cell_location(currNode,column):
+    index = 84 
+    while index >= 0:
+        if currNode.ship[index + (column - 1)].name != 'UNUSED':  #If is NAN or Container
+            tempLocation = (currNode.ship[index+(column - 1)].location[0] + 1, currNode.ship[index+(column - 1)].location[1])
+            if tempLocation[0] <= maxRow:
+                return tempLocation
+            else: #Full Column
+                return (-1,-1)
+        index = index - maxCol
+    return (1,column) #Empty Column, return bottom most cell
+    
+def exists(ship):
+    for list_of_containers in repeatedStates:
+        counter = 0
+        same = True
+        for container in list_of_containers:
+            if not container.name == ship[counter].name:
+                same = False
+                break
+            counter += 1
+        if same:
+            return True
+    return False
+
+def group_up(lst, var_lst): #https://www.geeksforgeeks.org/python-convert-1d-list-to-2d-list-of-variable-length/
+    idx = 0
+    for var_len in var_lst:
+        yield lst[idx : idx + var_len]
+        idx += var_len
+        
+def expand(givenNode, heap, isSift):
+    column = 1
+    while column <= maxCol: #8 for the puzzle, temp 4
+        emptyContainer = Container()
+        currNode = copy.deepcopy(givenNode)
+        currNode.g_n = currNode.g_n + 1
+        currNode.currColumn = column
+        if currNode.currContainer.location == (-1,-1): #need to pick up
+            topContainer = return_top_container(currNode,currNode.currColumn)
+            if topContainer.name != 'NAN' or topContainer.name != 'UNUSED': #if container is found
+                newNode = copy.deepcopy(currNode)
+                newNode.currContainer = topContainer
+                #currNode.ship[(row - 1)* column - 1]
+                newNode.ship[(topContainer.location[0] - 1)* maxCol + (topContainer.location[1] - 1)].name = "UNUSED" 
+                newNode.ship[(topContainer.location[0] - 1)* maxCol + (topContainer.location[1] - 1)].weight = 0
+                #Put down container
+                innerColumn = 1
+                # originalNode = copy.deepcopy(newNode)
+                while innerColumn <= maxCol:
+                    tempLocation = return_top_available_cell_location(newNode,innerColumn)
+                    # print("Current Top Available Cell:", tempLocation)
+                    if tempLocation == (-1,-1):
+                        innerColumn = innerColumn + 1
+                        continue
+                    #place it
+                    topContainerName = copy.deepcopy(topContainer.name)
+                    topContainerWeight = copy.deepcopy(topContainer.weight)
+                    # topContainerLocation = copy.deepcopy(topContainer.location)
+                    newNode.ship[(tempLocation[0] - 1) * maxCol + (tempLocation[1] - 1)].name = topContainerName
+                    newNode.ship[(tempLocation[0] - 1) * maxCol + (tempLocation[1] - 1)].weight = topContainerWeight
+                    # newNode.ship[(tempLocation[0] - 1) * maxCol + (tempLocation[1] - 1)].location = topContainerLocation
+                    newNode.currContainer = emptyContainer
+                    innerColumn = innerColumn + 1
+
+                    # print(len(repeatedStates))
+                    nodeToPush = copy.deepcopy(newNode)
+                    nodeToPush.moves.append((currNode.currColumn, tempLocation[1]))
+                    # if any(x == nodeToPush.ship for x in repeatedStates):#https://stackoverflow.com/questions/9371114/check-if-list-of-objects-contain-an-object-with-a-certain-attribute-value
+                    if not exists(nodeToPush.ship): 
+                        if isSift:
+                            nodeToPush.h_n = ComputeSIFTMisplacedTile(nodeToPush,SIFT(nodeToPush.ship))   
+                        heapq.heappush(heap,nodeToPush) 
+                        repeatedStates.append(nodeToPush.ship)
+                    newNode.ship[(tempLocation[0] - 1)* maxCol + (tempLocation[1] - 1)].name = "UNUSED" 
+                    newNode.ship[(tempLocation[0] - 1)* maxCol + (tempLocation[1] - 1)].weight = 0
+        column = column + 1
 
 def ComputeSIFTMisplacedTile(givenNode, goalShip):
     score = 0
@@ -210,90 +294,6 @@ def checkSIFTGoal(ship, goalShip): #goalship = [1,2,3,4,5,6,7,8]
 # initialState2 = Node()
 # initialState2.ship = ship
 # print(checkSIFTGoal(ship,SIFT(ship)))
-    
-def checkBalanceGoal(ship):
-    leftWeight = 0
-    rightWeight = 0
-    for cont in ship:
-        if(cont.location[1] <= (maxCol/2)): #need to fix this later
-            leftWeight += cont.weight
-        else:
-            rightWeight += cont.weight
-    if leftWeight + rightWeight == 0: #Empty Ship or all weights are 0
-        return True
-    return min(leftWeight, rightWeight)/max(leftWeight, rightWeight) >= 0.9
-
-def return_top_available_cell_location(currNode,column):
-    index = 84 
-    while index >= 0:
-        if currNode.ship[index + (column - 1)].name != 'UNUSED':  #If is NAN or Container
-            tempLocation = (currNode.ship[index+(column - 1)].location[0] + 1, currNode.ship[index+(column - 1)].location[1])
-            if tempLocation[0] <= maxRow:
-                return tempLocation
-            else: #Full Column
-                return (-1,-1)
-        index = index - maxCol
-    return (1,column) #Empty Column, return bottom most cell
-    
-def exists(ship):
-    for list_of_containers in repeatedStates:
-        counter = 0
-        same = True
-        for container in list_of_containers:
-            if not container.name == ship[counter].name:
-                same = False
-                break
-            counter += 1
-        if same:
-            return True
-    return False
-
-def expand(givenNode, heap, isSift):
-    column = 1
-    while column <= maxCol: #8 for the puzzle, temp 4
-        emptyContainer = Container()
-        currNode = copy.deepcopy(givenNode)
-        currNode.g_n = currNode.g_n + 1
-        currNode.currColumn = column
-        if currNode.currContainer.location == (-1,-1): #need to pick up
-            topContainer = return_top_container(currNode,currNode.currColumn)
-            if topContainer.name != 'NAN' or topContainer.name != 'UNUSED': #if container is found
-                newNode = copy.deepcopy(currNode)
-                newNode.currContainer = topContainer
-                #currNode.ship[(row - 1)* column - 1]
-                newNode.ship[(topContainer.location[0] - 1)* maxCol + (topContainer.location[1] - 1)].name = "UNUSED" 
-                newNode.ship[(topContainer.location[0] - 1)* maxCol + (topContainer.location[1] - 1)].weight = 0
-                #Put down container
-                innerColumn = 1
-                # originalNode = copy.deepcopy(newNode)
-                while innerColumn <= maxCol:
-                    tempLocation = return_top_available_cell_location(newNode,innerColumn)
-                    # print("Current Top Available Cell:", tempLocation)
-                    if tempLocation == (-1,-1):
-                        innerColumn = innerColumn + 1
-                        continue
-                    #place it
-                    topContainerName = copy.deepcopy(topContainer.name)
-                    topContainerWeight = copy.deepcopy(topContainer.weight)
-                    # topContainerLocation = copy.deepcopy(topContainer.location)
-                    newNode.ship[(tempLocation[0] - 1) * maxCol + (tempLocation[1] - 1)].name = topContainerName
-                    newNode.ship[(tempLocation[0] - 1) * maxCol + (tempLocation[1] - 1)].weight = topContainerWeight
-                    # newNode.ship[(tempLocation[0] - 1) * maxCol + (tempLocation[1] - 1)].location = topContainerLocation
-                    newNode.currContainer = emptyContainer
-                    innerColumn = innerColumn + 1
-
-                    # print(len(repeatedStates))
-                    nodeToPush = copy.deepcopy(newNode)
-                    nodeToPush.moves.append((currNode.currColumn, tempLocation[1]))
-                    # if any(x == nodeToPush.ship for x in repeatedStates):#https://stackoverflow.com/questions/9371114/check-if-list-of-objects-contain-an-object-with-a-certain-attribute-value
-                    if not exists(nodeToPush.ship): 
-                        if isSift:
-                            nodeToPush.h_n = ComputeSIFTMisplacedTile(nodeToPush,SIFT(nodeToPush.ship))   
-                        heapq.heappush(heap,nodeToPush) 
-                        repeatedStates.append(nodeToPush.ship)
-                    newNode.ship[(tempLocation[0] - 1)* maxCol + (tempLocation[1] - 1)].name = "UNUSED" 
-                    newNode.ship[(tempLocation[0] - 1)* maxCol + (tempLocation[1] - 1)].weight = 0
-        column = column + 1
 
 def balance(initialState):
     if not is_solvable(initialState):
