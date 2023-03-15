@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from typing import Any
 from typing import NamedTuple
 import copy
-from readManifest import * 
+from readManifest import *
 
 
 #global variables
@@ -34,7 +34,7 @@ class Node:
         self.toUnload = toUnload
         self.currColumn = currColumn
         self.currContainer = currContainer
-    
+
     def __lt__(self, other):
         return self.g_n + self.h_n < other.g_n + other.h_n
 
@@ -58,7 +58,7 @@ def printWeights(ship):
     return
 
 def calH(node):
-    return 
+    return
 
 #Balancing example
 # ship = []
@@ -78,7 +78,7 @@ def calH(node):
 #         ship.append(Container((i,j),0,'UNUSED'))
 #         j+=1
 #     i+=1
-#     
+#
 # ship[0] = Container((1,1),130,'Bob')
 # ship[1] = Container((1,2),20,'Bob2')
 # ship[2] = Container((1,3),50,'Bob3')
@@ -104,7 +104,7 @@ def calH(node):
 #     tree = queue.PriorityQueue(0)
 #     ship = numpy.empty([8, 12])
 #     buffer = numpy.empty([4, 24])
-    
+
 #     print('Hello World')
 def is_solvable(initialState):
     sum = 0.0
@@ -131,7 +131,7 @@ def ComputeSIFTMisplacedTile(givenNode, goalShip):
         i+=1
     return score
 
-def SIFT(SIFT_ship):       
+def SIFT(SIFT_ship):
     var_lst = []
     ship = []
     for container in SIFT_ship:
@@ -156,7 +156,7 @@ def SIFT(SIFT_ship):
             new_divided_ship[nested_index][int(left_pointer)] = ship[ship_pointer]
             left_pointer -= 1
             ship_pointer += 1
-            
+
             new_divided_ship[nested_index][int(right_pointer)] = ship[ship_pointer]
             right_pointer += 1
             ship_pointer += 1
@@ -181,7 +181,7 @@ def checkSIFTGoal(ship, goalShip): #goalship = [1,2,3,4,5,6,7,8]
 # initialState2 = Node()
 # initialState2.ship = ship
 # print(checkSIFTGoal(ship,SIFT(ship)))
-    
+
 def checkBalanceGoal(ship):
     leftWeight = 0
     rightWeight = 0
@@ -202,7 +202,7 @@ def checkBalanceGoal(ship):
 #     while row >= 0:
 #         if currNode.ship[row + (column - 1)].name != 'NAN' and currNode.ship[row + (column - 1)].name != 'UNUSED': #Container name != NAN or UNUSED:
 #             return currNode.ship[row+(column - 1)]
-#         row = row - 4 
+#         row = row - 4
 #     emptyContainer = Container()
 #     return emptyContainer
 
@@ -236,14 +236,14 @@ def doSIFT(initialState):
         else:
             #expand node
             expand(currState, heap, True)
-    
+
 
 # print(checkBalanceGoal(initialState2.ship))
 # print("Original:")
 # printList(ship)
 
 def return_top_available_cell_location(currNode,column):
-    index = 84 
+    index = 84
     while index >= 0:
         if currNode.ship[index + (column - 1)].name != 'UNUSED':  #If is NAN or Container
             tempLocation = (currNode.ship[index+(column - 1)].location[0] + 1, currNode.ship[index+(column - 1)].location[1])
@@ -253,14 +253,14 @@ def return_top_available_cell_location(currNode,column):
                 return (-1,-1)
         index = index - maxCol
     return (1,column) #Empty Column, return bottom most cell
-        
+
 # testing = return_top_available_cell_location(initialState,1)
 # print(testing)
 
 # testCont = return_top_container(initialState,1)
 # print(testCont.location,testCont.weight, testCont.name)
 # #Should return Container((1, 2), 6, '')
-    
+
 def exists(ship):
     for list_of_containers in repeatedStates:
         counter = 0
@@ -278,7 +278,7 @@ def exists(ship):
     # print("False")
     return False
     # for list_of_containers in repeatedStates: #iterates through ships in repeates states
-    #     for containers in ship:        
+    #     for containers in ship:
     #         for container in list_of_containers: #iterates through containers in current ship from repeated states
     #             print(container.name, containers.name)
     #             if container.name == containers.name:
@@ -305,7 +305,7 @@ def expand(givenNode, heap, isSift):
                 newNode = copy.deepcopy(currNode)
                 newNode.currContainer = topContainer
                 #currNode.ship[(row - 1)* column - 1]
-                newNode.ship[(topContainer.location[0] - 1)* maxCol + (topContainer.location[1] - 1)].name = "UNUSED" 
+                newNode.ship[(topContainer.location[0] - 1)* maxCol + (topContainer.location[1] - 1)].name = "UNUSED"
                 newNode.ship[(topContainer.location[0] - 1)* maxCol + (topContainer.location[1] - 1)].weight = 0
                 #Put down container
                 innerColumn = 1
@@ -333,20 +333,20 @@ def expand(givenNode, heap, isSift):
                     # print("Curr container: ")
                     # print(nodeToPush.currContainer.name, nodeToPush.currContainer.weight, nodeToPush.currContainer.location )
                     # if any(x == nodeToPush.ship for x in repeatedStates):#https://stackoverflow.com/questions/9371114/check-if-list-of-objects-contain-an-object-with-a-certain-attribute-value
-                    if not exists(nodeToPush.ship): 
+                    if not exists(nodeToPush.ship):
 #                         print("New:")
 #                         printShip(nodeToPush.ship)
                         if isSift:
-                            nodeToPush.h_n = ComputeSIFTMisplacedTile(nodeToPush,SIFT(nodeToPush.ship))   
-                        heapq.heappush(heap,nodeToPush) 
+                            nodeToPush.h_n = ComputeSIFTMisplacedTile(nodeToPush,SIFT(nodeToPush.ship))
+                        heapq.heappush(heap,nodeToPush)
                         repeatedStates.append(nodeToPush.ship)
-                    newNode.ship[(tempLocation[0] - 1)* maxCol + (tempLocation[1] - 1)].name = "UNUSED" 
+                    newNode.ship[(tempLocation[0] - 1)* maxCol + (tempLocation[1] - 1)].name = "UNUSED"
                     newNode.ship[(tempLocation[0] - 1)* maxCol + (tempLocation[1] - 1)].weight = 0
 
         column = column + 1
-    
 
-# heap = [] 
+
+# heap = []
 # heapq.heapify(heap)
 # expand(initialState,heap)
 # heapq.heappop(heap)
@@ -445,14 +445,14 @@ def balance(initialState):
 #q.push(Node(moveRight(currentPuzzle, blankPosition),nodeDepth + 1,calculateMisplacedTile(moveRight(currentPuzzle, blankPosition)) + nodeDepth));
 # temp = swapValues(puzzleTop, row-1, col, "up");
 
-        
+
 
 # numpy.array(cell, )
 
 # if __name__ == '__main__':
-    
+
 #     # ship[0][3] = "Joe"
-    
+
 #     algorithm()
 #     balance(ship, buffer)
 

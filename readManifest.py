@@ -18,6 +18,7 @@ def openFile():
     file = open(filepath, 'r') #'r' reads text
     file.close()
     
+
 def getFileName():
     return os.path.basename(file.name)
 
@@ -26,6 +27,7 @@ def getFileName():
         Output: list of containers on the ship
 '''
 def readFile(file):
+def readFile(file): #takes in an open file
     containers = file.readlines()
     currLine = 0
     Containers = []
@@ -39,9 +41,8 @@ def readFile(file):
         location = re.search("\[(\d\d),(\d\d)\], \{(\d{5})\}, ([^\n]*)", line) #figure out container name specs
         x_location = location.group(1)
         y_location = location.group(2)
-        weight = location.group(3)
+        weight = int(location.group(3))
         name = location.group(4)
         currContainer = Container((x_location, y_location), weight, name)
         Containers.append(currContainer)
     return Containers
-
