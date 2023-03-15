@@ -25,7 +25,7 @@ repeatedStates = [] #holds list of containers (ships)
 ###
 
 class Node:
-    def __init__(self, ship = [], buffer = [], g_n = 0, h_n = 0, toLoad = [], toUnload = [], currColumn = 0, currContainer = Container()):
+    def __init__(self, ship = [], buffer = [], g_n = 0, h_n = 0, toLoad = [], toUnload = [], currColumn = 0, currContainer = Container(), moves = []):
         self.ship = ship
         self.buffer = buffer
         self.g_n = g_n
@@ -34,6 +34,7 @@ class Node:
         self.toUnload = toUnload
         self.currColumn = currColumn
         self.currContainer = currContainer
+        self.moves = moves
     
     def __lt__(self, other):
         return self.g_n + self.h_n < other.g_n + other.h_n
@@ -70,22 +71,22 @@ def printWeights(ship):
 # ship.append(Container((2, 2), 0, 'UNUSED'))
 # ship.append(Container((2, 3), 0, 'UNUSED'))
 # ship.append(Container((2, 4), 0, 'UNUSED'))
-# ship = []
-# i = 1
-# while i <= 8:
-#     j = 1
-#     while j <= 12:
-#         ship.append(Container((i,j),0,'UNUSED'))
-#         j+=1
-#     i+=1
-#      
-# ship[0] = Container((1,1),130,'Bob')
-# ship[1] = Container((1,2),20,'Bob2')
-# ship[2] = Container((1,3),50,'Bob3')
-# ship[3] = Container((1,4),20,'Bob4')
+ship = []
+i = 1
+while i <= 8:
+    j = 1
+    while j <= 12:
+        ship.append(Container((i,j),0,'UNUSED'))
+        j+=1
+    i+=1
+     
+ship[0] = Container((1,1),130,'Bob')
+ship[1] = Container((1,2),20,'Bob2')
+ship[2] = Container((1,3),50,'Bob3')
+ship[3] = Container((1,4),20,'Bob4')
 
 #print(ship[1].location[0]) #Outputs 1
-ship = openFile()
+# ship = openFile()
 initialState = Node()
 initialState.ship = ship
 print("Original:")
@@ -230,6 +231,8 @@ def doSIFT(initialState):
         # print("State:")
         # printList(currState.ship)
         if checkSIFTGoal(currState.ship,SIFTvalue):
+            for i in currState.moves:
+                print(i)
             # print("G_N:")
             # print(currState.g_n)
             return currState
@@ -328,6 +331,7 @@ def expand(givenNode, heap, isSift):
 
                     # print(len(repeatedStates))
                     nodeToPush = copy.deepcopy(newNode)
+                    nodeToPush.moves.append((currNode.currColumn, tempLocation[1]))
                     # print("New:")
                     # printList(nodeToPush.ship)
                     # print("Curr container: ")
@@ -377,9 +381,11 @@ def balance(initialState):
         if (len(heap) == 0):
             return "Failure"
         currState = heapq.heappop(heap)
-        print("State:")
-        printShip(currState.ship)
+        # print("State:")
+        # printShip(currState.ship)
         if checkBalanceGoal(currState.ship):
+            for i in currState.moves:
+                print(i)
             # print(currState.g_n)
             return currState
         else:
