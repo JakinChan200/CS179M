@@ -47,7 +47,10 @@ def printShip(ship):
     for i in reversed(range(maxRow)):
         print('\n')
         for x in range(maxCol):
-            print(str(ship[(i)*maxCol + (x)].printContainer()) + " ", end = " ")
+            if ship[(i)*maxCol + (x)].name == 'NAN':
+                print("-1" + " ", end = " ")
+            else:
+                print(str(ship[(i)*maxCol + (x)].printContainer()) + " ", end = " ")
     print("\n")
     return
 
@@ -85,11 +88,11 @@ def calH(node):
 # ship[3] = Container((1,4),20,'Bob4')
 
 #print(ship[1].location[0]) #Outputs 1
-
-# initialState = Node()
-# initialState.ship = ship
-# print("Original:")
-# printList(ship)
+ship = openFile()
+initialState = Node()
+initialState.ship = ship
+print("Original:")
+printShip(ship)
 # print(ship[1].printContainer())
 #Looks like this now:
         # 6  |    |    |    |
@@ -377,8 +380,8 @@ def balance(initialState):
         if (len(heap) == 0):
             return "Failure"
         currState = heapq.heappop(heap)
-        # print("State:")
-        # printList(currState.ship)
+        print("State:")
+        printShip(currState.ship)
         if checkBalanceGoal(currState.ship):
             # print(currState.g_n)
             return currState
@@ -413,13 +416,13 @@ def balance(initialState):
 # repeatedStates.append(initialState3.ship)
 # exists(initialState.ship)
 
-# temp = balance(initialState)
-# if temp == "Failure":
-#     print(temp)
-# else:
-#     print("Solved:")
-#     printShip(temp.ship)
-#     printList(temp.ship)
+temp = balance(initialState)
+if temp == "Failure":
+    print(temp)
+else:
+    print("Solved:")
+    printShip(temp.ship)
+
 
 ###############################################################
 
