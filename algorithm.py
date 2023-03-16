@@ -61,9 +61,6 @@ def printWeights(ship):
     print("\n")
     return
 
-def calH(node):
-    return
-
 #Balancing example
 # ship = []
 # ship.append(Container((1, 1), 10, '')) #Ship[0]
