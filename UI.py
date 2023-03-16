@@ -203,7 +203,7 @@ def success_page(names, fileName):
     window.close()
 
 def main():
-#     main_page('','') #First open main page with no employee name and no file name
-    success_page('Ash', 'Login.txt') #Testing Success page
+    main_page('','') #First open main page with no employee name and no file name
+    # success_page('Ash', 'Login.txt') #Testing Success page
 if __name__ == '__main__':
     main()
