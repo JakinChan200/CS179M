@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from typing import Any
 from typing import NamedTuple
 import copy
-# from readManifest import * 
+from readManifest import * 
 
 
 #global variables
@@ -14,13 +14,13 @@ maxRow = 8
 repeatedStates = [] #holds list of containers (ships)
 
 # From Other File
-class Container():
-    def __init__(self, location = (-1, -1), weight = 0, name = ''):
-        self.location = location
-        self.weight = weight
-        self.name = name
-    def printContainer(self):
-        return self.weight
+# class Container():
+#     def __init__(self, location = (-1, -1), weight = 0, name = ''):
+#         self.location = location
+#         self.weight = weight
+#         self.name = name
+#     def printContainer(self):
+#         return self.weight
 #         return f"Location: {self.location}, Weight: {self.weight}, Name: {self.name}"
 # ##
 
@@ -30,8 +30,8 @@ class Node:
         self.buffer = buffer
         self.g_n = g_n
         self.h_n = h_n
-        self.toLoad = toLoad
-        self.toUnload = toUnload
+        self.toLoad = toLoad #list of containers
+        self.toUnload = toUnload #list of string names of containers since duplicate names can be treated the same
         self.currColumn = currColumn
         self.currContainer = currContainer
         self.moves = moves
@@ -135,7 +135,21 @@ def return_top_available_cell_location(currNode,column):
                 return (-1,-1)
         index = index - maxCol
     return (1,column) #Empty Column, return bottom most cell
-    
+
+def return_left_most_empty_column_location(currNode):
+    column = 1
+    while column <= maxCol:
+        if return_top_available_cell_location(currNode,column) == (1,column): #if column is empty
+            return (1,column)
+        column += 1
+
+def numContainers_on_ship(ship):
+    count = 0
+    for i in ship:
+        if i.name != 'NAN' and i.name != 'UNUSED':
+            count += 1
+    return count
+            
 def exists(ship):
     for list_of_containers in repeatedStates:
         counter = 0
@@ -335,16 +349,25 @@ def expandUnload(givenNode, heap):
                 #push ship with deleted container
                 unloadNode = copy.deepcopy(newNode)
                 unloadNode.moves.append((currNode.currColumn, -1))
+                if len(unloadNode.toLoad) > 0:
+                    toLoadContainer = unloadNode.toLoad.pop()
+                    locationForLoad = return_left_most_empty_column_location(unloadNode)
+                    unloadNode.ship[(locationForLoad[0] - 1)* maxCol + (locationForLoad[1] - 1)].name = toLoadContainer.name
+                    unloadNode.ship[(locationForLoad[0] - 1)* maxCol + (locationForLoad[1] - 1)].weight = toLoadContainer.weight
+                    unloadNode.moves.append((-1, locationForLoad[1]))
                 if not exists(unloadNode.ship): 
                     # print("State:")
                     # printShip(unloadNode.ship)
                     for containerToUnload in unloadNode.toUnload:
                         if containerToUnload == unloadNode.currContainer.name:
                             unloadNode.toUnload.remove(containerToUnload)
-                            unloadNode.h_n -= 100
-                        else:
-                            unloadNode.h_n = 100
+                            # unloadNode.h_n -= 100
+                        # else:
+                            # unloadNode.h_n = 100
+                    # printShip(unloadNode.ship)
+                    unloadNode.currContainer = emptyContainer
                     heapq.heappush(heap,unloadNode)
+                    repeatedStates.append(unloadNode.ship)
 
                 while innerColumn <= maxCol:
                     tempLocation = return_top_available_cell_location(newNode,innerColumn)
@@ -369,7 +392,7 @@ def expandUnload(givenNode, heap):
                     if not exists(nodeToPush.ship): 
                         # print("State:")
                         # printShip(nodeToPush.ship)
-                        nodeToPush.h_n = calculateManhattanDist(topContainer.location, tempLocation) + len(nodeToPush.toUnload)
+                        # nodeToPush.h_n = calculateManhattanDist(topContainer.location, tempLocation) + len(nodeToPush.toUnload)
                         heapq.heappush(heap,nodeToPush) 
                         repeatedStates.append(nodeToPush.ship)
                     newNode.ship[(tempLocation[0] - 1)* maxCol + (tempLocation[1] - 1)].name = "UNUSED" 
@@ -386,18 +409,22 @@ def unload(initialState):
     heapq.heapify(heap)
     heapq.heappush(heap,initialState)
     repeatedStates.append(initialState.ship)
+    original_num_containers = numContainers_on_ship(initialState.ship)
+    original_to_Load = len(initialState.toLoad)
+    original_to_Unload = len(initialState.toUnload)
     while True:
         if (len(heap) == 0):
+            print("Failed\n")
             return "Failure"
         currState = heapq.heappop(heap)
-        print("Expanded:")
-        printShip(currState.ship)
-        print("H_n",currState.h_n)
-        print()
-        print("G_n",currState.g_n)
-        print()
-        print("G_n + H_N", currState.g_n + currState.h_n)
-        if len(currState.toLoad) == 0 and len(currState.toUnload) == 0:
+        # print("Expanded:")
+        # printShip(currState.ship)
+        # print("H_n",currState.h_n)
+        # print()
+        # print("G_n",currState.g_n)
+        # print()
+        # print("G_n + H_N", currState.g_n + currState.h_n)
+        if len(currState.toLoad) == 0 and len(currState.toUnload) == 0 and original_num_containers + original_to_Load - original_to_Unload == numContainers_on_ship(currState.ship):
             for i in currState.moves:
                 print(i)
             print("Answer:")
@@ -407,29 +434,45 @@ def unload(initialState):
             #expand node
             expandUnload(currState, heap)
 
-ship = []
-i = 1
-while i <= 8:
-    j = 1
-    while j <= 12:
-        ship.append(Container((i,j),0,'UNUSED'))
-        j+=1
-    i+=1
+# ship = []
+# i = 1
+# while i <= 8:
+#     j = 1
+#     while j <= 12:
+#         ship.append(Container((i,j),0,'UNUSED'))
+#         j+=1
+#     i+=1
      
-ship[0] = Container((1,1),10,'Bob')
-ship[1] = Container((1,2),20,'Bob2')
-ship[2] = Container((1,3),50,'Bob3')
-ship[3] = Container((1,4),30,'Bob4')
-initialState = Node()
-initialState.ship = ship
-initialState.toUnload = ["Bob", "Bob2"]
-print("Original:")
-printShip(ship)
-heap = []
-heapq.heapify(heap)
-heapq.heappush(heap,initialState)
-repeatedStates.append(initialState.ship)
-unload(initialState)
+# ship[0] = Container((1,1),10,'Bob')
+# ship[12] = Container((2,1),20,'Bob2')
+# # ship[2] = Container((1,3),50,'Bob3')
+# # ship[3] = Container((1,4),30,'Bob4')
+# initialState = Node()
+# initialState.ship = ship
+# initialState.toUnload = ["Bob","Bob2"]
+# initialState.toLoad = [Container((0,0),30,'Bob3'), Container((0,0),40,'Bob4')]
+# print("Original:")
+# printShip(ship)
+# heap = []
+# heapq.heapify(heap)
+# heapq.heappush(heap,initialState)
+# repeatedStates.append(initialState.ship)
+# unload(initialState)
+
+# print("Level 1\n")
+# print("--------------------------\n")
+# popState = heapq.heappop(heap) #initial
+# expandUnload(initialState,heap)
+# popState = heapq.heappop(heap)
+# print("Level 2 Node\n")
+# print("--------------------------\n")
+# printShip(popState.ship)
+# print("Level 2\n")
+# print("--------------------------\n")
+# expandUnload(popState, heap)
+# for i in repeatedStates:
+#     print("Repeated States:")
+#     printShip(i)
 
 ###############################################################
 
