@@ -30,7 +30,6 @@ def getFileName():
         Inputs: text file -- manifest that contains information about containers on ships
         Output: list of containers on the ship
 '''
-def readFile(file):
 def readFile(file): #takes in an open file
     containers = file.readlines()
     currLine = 0
