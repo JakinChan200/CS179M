@@ -336,11 +336,14 @@ def expandUnload(givenNode, heap):
                 unloadNode = copy.deepcopy(newNode)
                 unloadNode.moves.append((currNode.currColumn, -1))
                 if not exists(unloadNode.ship): 
-                    print("State:")
-                    printShip(unloadNode.ship)
+                    # print("State:")
+                    # printShip(unloadNode.ship)
                     for containerToUnload in unloadNode.toUnload:
                         if containerToUnload == unloadNode.currContainer.name:
                             unloadNode.toUnload.remove(containerToUnload)
+                            unloadNode.h_n -= 100
+                        else:
+                            unloadNode.h_n = 100
                     heapq.heappush(heap,unloadNode)
 
                 while innerColumn <= maxCol:
@@ -366,11 +369,16 @@ def expandUnload(givenNode, heap):
                     if not exists(nodeToPush.ship): 
                         # print("State:")
                         # printShip(nodeToPush.ship)
+                        nodeToPush.h_n = calculateManhattanDist(topContainer.location, tempLocation) + len(nodeToPush.toUnload)
                         heapq.heappush(heap,nodeToPush) 
                         repeatedStates.append(nodeToPush.ship)
                     newNode.ship[(tempLocation[0] - 1)* maxCol + (tempLocation[1] - 1)].name = "UNUSED" 
                     newNode.ship[(tempLocation[0] - 1)* maxCol + (tempLocation[1] - 1)].weight = 0
         column = column + 1
+
+def calculateManhattanDist(start, destination):
+    return abs(start[0] - destination[0]) + abs(start[1] - destination[1])
+
 
 def unload(initialState):
     currState = Node()
@@ -382,6 +390,13 @@ def unload(initialState):
         if (len(heap) == 0):
             return "Failure"
         currState = heapq.heappop(heap)
+        print("Expanded:")
+        printShip(currState.ship)
+        print("H_n",currState.h_n)
+        print()
+        print("G_n",currState.g_n)
+        print()
+        print("G_n + H_N", currState.g_n + currState.h_n)
         if len(currState.toLoad) == 0 and len(currState.toUnload) == 0:
             for i in currState.moves:
                 print(i)
@@ -404,10 +419,10 @@ while i <= 8:
 ship[0] = Container((1,1),10,'Bob')
 ship[1] = Container((1,2),20,'Bob2')
 ship[2] = Container((1,3),50,'Bob3')
-ship[3] = Container((1,4),20,'Bob4')
+ship[3] = Container((1,4),30,'Bob4')
 initialState = Node()
 initialState.ship = ship
-initialState.toUnload = ["Bob2"]
+initialState.toUnload = ["Bob", "Bob2"]
 print("Original:")
 printShip(ship)
 heap = []
