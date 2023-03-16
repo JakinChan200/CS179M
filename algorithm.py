@@ -338,6 +338,9 @@ def expandUnload(givenNode, heap):
                 if not exists(unloadNode.ship): 
                     print("State:")
                     printShip(unloadNode.ship)
+                    for containerToUnload in unloadNode.toUnload:
+                        if containerToUnload == unloadNode.currContainer.name:
+                            unloadNode.toUnload.remove(containerToUnload)
                     heapq.heappush(heap,unloadNode)
 
                 while innerColumn <= maxCol:
@@ -361,8 +364,8 @@ def expandUnload(givenNode, heap):
                     nodeToPush.moves.append((currNode.currColumn, tempLocation[1]))
                     # if any(x == nodeToPush.ship for x in repeatedStates):#https://stackoverflow.com/questions/9371114/check-if-list-of-objects-contain-an-object-with-a-certain-attribute-value
                     if not exists(nodeToPush.ship): 
-                        print("State:")
-                        printShip(nodeToPush.ship)
+                        # print("State:")
+                        # printShip(nodeToPush.ship)
                         heapq.heappush(heap,nodeToPush) 
                         repeatedStates.append(nodeToPush.ship)
                     newNode.ship[(tempLocation[0] - 1)* maxCol + (tempLocation[1] - 1)].name = "UNUSED" 
@@ -382,6 +385,8 @@ def unload(initialState):
         if len(currState.toLoad) == 0 and len(currState.toUnload) == 0:
             for i in currState.moves:
                 print(i)
+            print("Answer:")
+            printShip(currState.ship)
             return currState
         else:
             #expand node
@@ -402,13 +407,14 @@ ship[2] = Container((1,3),50,'Bob3')
 ship[3] = Container((1,4),20,'Bob4')
 initialState = Node()
 initialState.ship = ship
+initialState.toUnload = ["Bob2"]
 print("Original:")
 printShip(ship)
 heap = []
 heapq.heapify(heap)
 heapq.heappush(heap,initialState)
 repeatedStates.append(initialState.ship)
-expandUnload(initialState,heap)
+unload(initialState)
 
 ###############################################################
 
