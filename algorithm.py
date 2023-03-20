@@ -75,7 +75,7 @@ def printWeights(ship):
 
 #print(ship[1].location[0]) #Outputs 1
 # ship = openFile()
-
+# 
 # print("Original:")
 # printShip(ship)
 # print(ship[1].printContainer())
@@ -357,8 +357,6 @@ def expandUnload(givenNode, heap):
                     unloadNode.ship[(locationForLoad[0] - 1)* maxCol + (locationForLoad[1] - 1)].name = toLoadContainer.name
                     unloadNode.ship[(locationForLoad[0] - 1)* maxCol + (locationForLoad[1] - 1)].weight = toLoadContainer.weight
                     unloadNode.moves.append((-1, -1, locationForLoad[0], locationForLoad[1]))
-                if not exists(unloadNode.ship): 
-                    unloadNode.moves.append((-1, -1, locationForLoad[0], locationForLoad[1]))
                 if not exists(unloadNode.ship):
                     # print("State:")
                     # printShip(unloadNode.ship)
@@ -455,6 +453,11 @@ def unload(initialState):
 # initialState.ship = ship
 # initialState.toUnload = ["Bob","Bob2"]
 # initialState.toLoad = [Container((0,0),30,'Bob3'), Container((0,0),40,'Bob4')]
+# ship = openFile()
+# initialState = Node()
+# initialState.ship = ship
+# initialState.toLoad = [Container((0,0),2,'Liz')]
+# initialState.toUnload = ['Cat','Dog']
 # print("Original:")
 # printShip(ship)
 # heap = []

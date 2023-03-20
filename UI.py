@@ -1,3 +1,19 @@
+# import PySimpleGUI as psg
+# names = ["Bob","Bob2"]
+# lst = psg.Listbox(names, size=(20, 4), font=('Arial Bold', 14), expand_y=True, enable_events=True, key='-LIST-',select_mode="multiple")
+# layout = [
+#    [lst],
+#    [psg.Text("", key='-MSG-', font=('Arial Bold', 14), justification='center')],
+#    [psg.Button('Exit')],
+# ]
+# window = psg.Window('Listbox Example', layout, size=(600, 200))
+# while True:
+#    event, values = window.read()
+#    if event in (psg.WIN_CLOSED, 'Exit'):
+#       print(values['-LIST-'])
+# window.close()
+
+
 import time
 import datetime as dt
 from readManifest import *
@@ -44,10 +60,10 @@ def main_page(name, fileName):
         event, values = window.read(timeout=10) #Timeout is required for updating clock
         if event == 'Login': #Employee clicks Login button
             window.close()
-            signin_page(name,fileName,'main')
+            signin_page(name,fileName,'main','','','')
         elif event == 'Comments': #Employee clicks Comments button
             window.close()
-            comments_page(name, fileName, 'main')
+            comments_page(name, fileName, 'main','','','')
         elif event == 'Loading/Unloading': #Employee clicks Loading/Unloading button
             window.close()
             unloading_loading_page(name,fileName)
@@ -69,7 +85,7 @@ def upload_file(name):
     main_page(name,getFileName())
 
 
-def signin_page(name, fileName, function_call): #function_call tells which function is calling this function
+def signin_page(name, fileName, function_call,containers_to_unload,toLoad,unLoad): #function_call tells which function is calling this function
     sg.theme('LightGray1')  #Can change theme https://www.geeksforgeeks.org/themes-in-pysimplegui/
     font = ('Arial',15)
 
@@ -92,9 +108,14 @@ def signin_page(name, fileName, function_call): #function_call tells which funct
         balancing_page(values[0],fileName)
     elif function_call == 'moves':
         moves_page(values[0],fileName)
+    elif function_call == 'load page':
+        load_page(name,fileName,containers_to_unload)
+    elif function_call == 'calculate unload':
+        calculate_unload(name,fileName,toLoad,unLoad)
+        
 
 
-def comments_page(name, fileName,function_call): #function_call tells which function is calling this function
+def comments_page(name, fileName,function_call,containers_to_unload,toLoad,unLoad): #function_call tells which function is calling this function
     sg.theme('LightGray1')  #Can change theme https://www.geeksforgeeks.org/themes-in-pysimplegui/
     font = ('Arial',15)
 
@@ -117,45 +138,134 @@ def comments_page(name, fileName,function_call): #function_call tells which func
         balancing_page(name,fileName)
     elif function_call == 'moves':
         moves_page(name,fileName)
+    elif function_call == 'load page':
+        load_page(name,fileName,containers_to_unload)
+    elif function_call == 'calculate unload':
+        calculate_unload(name,fileName,toLoad,unLoad)
     #TODO: Add variable to store the comments made
 
 def unloading_loading_page(names,fileName):
     sg.theme('LightGray1')
     font = ('Arial',30)
+    name = []
+    initialState = Node()
+    initialState.ship = manifest_ship
+    for i in manifest_ship:
+        if i.name != 'UNUSED' and i.name != 'NAN':
+            name.append(i.name)
+            
+    lst = sg.Listbox(name, size=(20, 4), font=('Arial Bold', 14), expand_y=True, enable_events=True, key='-LIST-',select_mode="multiple")
 
     layout = [
     [sg.Text(fileName,font = font),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],
     [sg.Text('',size = (0,3))],
-    [[sg.B('',size=(3,1),pad = (0.1,0), key=(i,j)) for i in range (8)] for j in range(12)],
+    [lst],
     [sg.Text('',size = (0,3))],
     [sg.Button('Comments',size=(10,2),font = ('Arial',14)), sg.Button('Done',pad = (200,0),size = (10,2),font = ('Arial',14)),sg.Button('Login',size=(10,2),font = ('Arial',14))]
     ]
 
+    
     window = sg.Window('Loading Unloading Page', layout, size=(900, 700),finalize = True)
     while True:
         event, values = window.read(timeout = 10)
+        containers_to_unload = values['-LIST-']
         if event == 'Login': #Employee clicks Login button
             window.close()
-            signin_page(names, fileName, 'load unload')
+            signin_page(names, fileName, 'load unload','','','')
         elif event == 'Comments': #Employee clicks Comments button
             window.close()
-            comments_page(names,fileName,'load unload')
+            comments_page(names,fileName,'load unload','','','')
+        elif event == 'Done':
+            window.close()
+            containers_to_unload = values['-LIST-']
+            load_page(names,fileName,containers_to_unload)
         elif event == sg.WIN_CLOSED: #Employee clicks the X on the program
             exit()
         window['time'].update(time.strftime('%H:%M:%S')) #Update clock in real time (Military time, local time)
 
         #TODO add implementation for done button
     window.close()
+    
+def load_page(names,fileName,containers_to_unload):
+    sg.theme('LightGray1')
+    font = ('Arial',30)
+    toLoad= []
+    
+    layout = [
+    [sg.Text(fileName,font = font),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],
+    [sg.Text('Enter name and weight for containers to load',font = font)],
+    [sg.Text('Name',size = (15,1)),sg.InputText(key = 'input')],
+    [sg.Text('Weight',size = (15,1)),sg.InputText(key = 'input2')],
+    [sg.Button('Next',size = (10,2),font = ('Arial,14'))],
+    [sg.Button('Comments',size=(10,2),font = ('Arial',14)), sg.Button('Done',pad = (200,0),size = (10,2),font = ('Arial',14)),sg.Button('Login',size=(10,2),font = ('Arial',14))]
+    ]
+    window = sg.Window('Balancing Page', layout, size=(900, 700),finalize = True)
+
+    while True:
+        event, values = window.read(timeout = 10)
+        if event == 'Login': #Employee clicks Login button
+            window.close()
+            signin_page(names, fileName, 'load page',containers_to_unload,'','')
+        elif event == 'Comments': #Employee clicks Comments button
+            window.close()
+            comments_page(names,fileName,'load page',containers_to_unload,'','')
+        elif event == 'Done':
+            window.close()
+            calculate_unload(names,fileName,toLoad,containers_to_unload)
+        elif event == 'Next':
+            toLoad.append(Container((0,0),values['input2'],values['input']))
+            window['input'].update('')
+            window['input2'].update('')
+        elif event == sg.WIN_CLOSED: #Employee clicks the X on the program
+            exit()
+        window['time'].update(time.strftime('%H:%M:%S')) #Update clock in real time (Military time, local time)
+
+    window.close()
+    
+def calculate_unload(names,fileName,toLoad,unLoad):
+    sg.theme('LightGray1')
+    font = ('Arial',30)
+    
+    layout = [
+    [sg.Text(fileName,font = font),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],
+    [sg.Text('',size = (0,3))],
+    [sg.Text('Calculating Loading and Unloading of Ship',font = font, size = (0,3))],
+    [sg.Text('',size = (0,3))],
+    [sg.Button('Comments',size=(10,2),font = ('Arial',14)), sg.Button('Done',pad = (200,0),size = (10,2),font = ('Arial',14)),sg.Button('Login',size=(10,2),font = ('Arial',14))]
+    ]
+    window = sg.Window('Loading Unloading Page', layout, size=(900, 700),finalize = True)
+    initialState = Node()
+    initialState.ship = manifest_ship
+    initialState.toLoad = toLoad
+    initialState.toUnload = unLoad
+    finished_state = unload(initialState)
+    while True:
+        event, values = window.read(timeout = 10)
+        if event == 'Login': #Employee clicks Login button
+            window.close()
+            signin_page(names, fileName, 'calculate unload','',toLoad,unLoad)
+        elif event == 'Comments': #Employee clicks Comments button
+            window.close()
+            comments_page(names,fileName,'calculate unload','',toLoad,unLoad)
+        elif event == 'Done':
+            window.close()
+            moves_page(names,fileName,finished_state)
+        elif event == sg.WIN_CLOSED: #Employee clicks the X on the program
+            exit()
+        window['time'].update(time.strftime('%H:%M:%S')) #Update clock in real time (Military time, local time)
+
+    window.close()
+    
+    
 
 def balancing_page(names,fileName):
-    global balanced_result
     sg.theme('LightGray1')
     font = ('Arial',30)
 
     layout = [
     [sg.Text(fileName,font = font),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],
     [sg.Text('',size = (0,3))],
-    [sg.Text('Calculating Balance of Ship',size = (0,3))],
+    [sg.Text('Calculating Balance of Ship',font = font, size = (0,3))],
     [sg.Text('',size = (0,3))],
     [sg.Button('Comments',size=(10,2),font = ('Arial',14)), sg.Button('Done',pad = (200,0),size = (10,2),font = ('Arial',14)),sg.Button('Login',size=(10,2),font = ('Arial',14))]
     ]
@@ -167,27 +277,27 @@ def balancing_page(names,fileName):
         event, values = window.read(timeout = 10)
         if event == 'Login': #Employee clicks Login button
             window.close()
-            signin_page(names, fileName, 'balance')
+            signin_page(names, fileName, 'balance','','','')
         elif event == 'Comments': #Employee clicks Comments button
             window.close()
-            comments_page(names,fileName,'balance')
+            comments_page(names,fileName,'balance','','','')
         elif event == 'Done':
             window.close()
-            moves_page(names,fileName)
+            moves_page(names,fileName,balanced_result)
         elif event == sg.WIN_CLOSED: #Employee clicks the X on the program
             exit()
         window['time'].update(time.strftime('%H:%M:%S')) #Update clock in real time (Military time, local time)
 
     window.close()
 
-def moves_page(names,fileName):
+def moves_page(names,fileName, resultNode):
     sg.theme('LightGray1')
     font = ('Arial',30)
-    string_balanced_result = ','.join(str(move) for move in balanced_result.moves) #(1,2,1,8) with parenthesis and commas
-    string_balanced_result = re.sub(" ", "", string_balanced_result)
+    string_node_result = ','.join(str(move) for move in resultNode.moves) #(1,2,1,8) with parenthesis and commas
+    string_node_result = re.sub(" ", "", string_node_result)
 
 
-    list_of_moves = re.findall("\d+", string_balanced_result)
+    list_of_moves = re.findall("-?\d+", string_node_result)
 
     string_of_moves = ""
     iteration = 1
@@ -222,10 +332,10 @@ def moves_page(names,fileName):
         event, values = window.read(timeout = 10)
         if event == 'Login': #Employee clicks Login button
             window.close()
-            signin_page(names, fileName, 'moves')
+            signin_page(names, fileName, 'moves','','','')
         elif event == 'Comments': #Employee clicks Comments button
             window.close()
-            comments_page(names,fileName,'moves')
+            comments_page(names,fileName,'moves','','','')
         elif event == 'Done':
             window.close()
             main_page(names,'')
@@ -240,3 +350,4 @@ def main():
     main_page('','') #First open main page with no employee name and no file name
 if __name__ == '__main__':
     main()
+
