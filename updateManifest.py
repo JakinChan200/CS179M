@@ -3,7 +3,7 @@ import os.path
 import re # for regex
 from readManifest import *
 
-#Test function
+# #Test function
 # ship = []
 # i = 1
 # while i <= 8:
@@ -19,11 +19,13 @@ from readManifest import *
 # ship[3] = Container((1,4),20,'Bob4')
 
 def writeManifest(manifestOrigName, ship):
-    file = open(manifestOrigName+"_OUTBOUND.txt", 'w')
+    save_path = "/Users/lizbethareizaga/Desktop"
+    completeName = os.path.join(save_path, manifestOrigName+"_OUTBOUND.txt")
+    file = open(completeName, 'w')
     for container in ship:
         line = "[" + "{:02d}".format(container.location[0]) + "," + "{:02d}".format(container.location[1]) + "], {" + "{:05d}".format(container.weight) + "}, " + container.name + "\n"
         file.write(line)
     file.close()
 
-# Test function
+# #Test function
 # writeManifest("Example_manifest", ship)
