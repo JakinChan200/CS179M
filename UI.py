@@ -109,9 +109,11 @@ def signin_page(name, fileName, function_call,containers_to_unload,toLoad,unLoad
     elif function_call == 'moves':
         moves_page(values[0],fileName)
     elif function_call == 'load page':
-        load_page(name,fileName,containers_to_unload)
+        load_page(values[0],fileName,containers_to_unload)
     elif function_call == 'calculate unload':
-        calculate_unload(name,fileName,toLoad,unLoad)
+        calculate_unload(values[0],fileName,toLoad,unLoad)
+    elif function_call == 'success':
+        success_page(values[0],fileName)
         
 
 
@@ -142,6 +144,8 @@ def comments_page(name, fileName,function_call,containers_to_unload,toLoad,unLoa
         load_page(name,fileName,containers_to_unload)
     elif function_call == 'calculate unload':
         calculate_unload(name,fileName,toLoad,unLoad)
+    elif function_call == 'success':
+        success_page(name,fileName)
     #TODO: Add variable to store the comments made
 
 def unloading_loading_page(names,fileName):
@@ -290,6 +294,43 @@ def balancing_page(names,fileName):
         window['time'].update(time.strftime('%H:%M:%S')) #Update clock in real time (Military time, local time)
 
     window.close()
+    
+def success_page(names, fileName):
+    sg.theme('LightGray1')
+    font = ('Arial',30)
+    shortenedfileName = copy.deepcopy(fileName)
+    shortenedfileName = shortenedfileName[:-4]
+    outboundFileName = shortenedfileName + '_OUTBOUND.txt'
+    layout = [
+    [sg.Text(fileName,font = font),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],
+    [sg.Text('',size = (0,5))],
+    [sg.Text('Success! No more moves to make.',size = (0,3), font = ('Arial 25'), pad = (210,0))],
+    [sg.Text('',size = (0,5))],
+    [sg.Text('Please email ' + outboundFileName + ' to the captain.',size = (0,3), font = ('Arial 25'),pad = (125,0))],
+    [sg.Text('',size = (0,5))],
+    [sg.Text(outboundFileName + ' is available on the Desktop.',size = (0,3), font = ('Arial 15'),pad = (250,0))],
+    [sg.Text('',size = (0,5))],
+    [sg.Button('Comments',size=(10,2),font = ('Arial',14)), sg.Button('Done',pad = (200,0),size = (10,2),font = ('Arial',14)),sg.Button('Login',size=(10,2),font = ('Arial',14))]
+    ]
+
+    window = sg.Window('Balancing Page', layout, size=(900, 700),finalize = True)
+    while True:
+        event, values = window.read(timeout = 10)
+        if event == 'Login': #Employee clicks Login button
+            window.close()
+            signin_page(names, fileName, 'success','','','')
+        elif event == 'Comments': #Employee clicks Comments button
+            window.close()
+            comments_page(names,fileName,'success','','','')
+        elif event == sg.WIN_CLOSED: #Employee clicks the X on the program
+            exit()
+        elif event == 'Done':
+            window.close()
+            main_page(names, '')
+        window['time'].update(time.strftime('%H:%M:%S')) #Update clock in real time (Military time, local time)
+
+    window.close()
+
 
 def moves_page(names,fileName, resultNode):
     sg.theme('LightGray1')
@@ -339,7 +380,7 @@ def moves_page(names,fileName, resultNode):
             comments_page(names,fileName,'moves','','','')
         elif event == 'Done':
             window.close()
-            main_page(names,'')
+            success_page(names,fileName)
         elif event == sg.WIN_CLOSED: #Employee clicks the X on the program
             exit()
         window['time'].update(time.strftime('%H:%M:%S')) #Update clock in real time (Military time, local time)
