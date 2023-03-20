@@ -75,7 +75,7 @@ def printWeights(ship):
 
 #print(ship[1].location[0]) #Outputs 1
 # ship = openFile()
-
+# 
 # print("Original:")
 # printShip(ship)
 # print(ship[1].printContainer())
@@ -205,7 +205,7 @@ def expandBalance(givenNode, heap, isSift):
 
                     # print(len(repeatedStates))
                     nodeToPush = copy.deepcopy(newNode)
-                    nodeToPush.moves.append((currNode.currColumn, tempLocation[1]))
+                    nodeToPush.moves.append((topContainer.location[0], currNode.currColumn, tempLocation[0], tempLocation[1]))
                     # if any(x == nodeToPush.ship for x in repeatedStates):#https://stackoverflow.com/questions/9371114/check-if-list-of-objects-contain-an-object-with-a-certain-attribute-value
                     if not exists(nodeToPush.ship):
                         if isSift:
@@ -283,18 +283,6 @@ def checkSIFTGoal(ship, goalShip): #goalship = [1,2,3,4,5,6,7,8]
         if ship[i].weight != goalShip[i]:
             return False
     return True
-# ship = []
-# ship.append(Container((1, 1), 4, '')) #Ship[0]
-# ship.append(Container((1, 2), 10, 'UNUSED'))
-# ship.append(Container((1, 3), 6, ''))
-# ship.append(Container((1, 4), 0, ''))
-# ship.append(Container((2, 1), 0, 'UNUSED'))
-# ship.append(Container((2, 2), 0, 'UNUSED'))
-# ship.append(Container((2, 3), 0, 'UNUSED'))
-# ship.append(Container((2, 4), 0, 'UNUSED'))
-# initialState2 = Node()
-# initialState2.ship = ship
-# print(checkSIFTGoal(ship,SIFT(ship)))
 
 def balance(initialState):
     if not is_solvable(initialState):
@@ -329,6 +317,20 @@ def balance(initialState):
 #     print("Solved:")
 #     printShip(temp.ship)
 
+# ship = []
+# ship.append(Container((1, 1), 4, '')) #Ship[0]
+# ship.append(Container((1, 2), 10, 'UNUSED'))
+# ship.append(Container((1, 3), 6, ''))
+# ship.append(Container((1, 4), 0, ''))
+# ship.append(Container((2, 1), 0, 'UNUSED'))
+# ship.append(Container((2, 2), 0, 'UNUSED'))
+# ship.append(Container((2, 3), 0, 'UNUSED'))
+# ship.append(Container((2, 4), 0, 'UNUSED'))
+# initialState2 = Node()
+# initialState2.ship = ship
+# balance(initialState2)
+# print(checkSIFTGoal(ship,SIFT(ship)))
+ 
 def expandUnload(givenNode, heap):
     column = 1
     while column <= maxCol: #8 for the puzzle, temp 4
@@ -348,13 +350,13 @@ def expandUnload(givenNode, heap):
                 innerColumn = 1
                 #push ship with deleted container
                 unloadNode = copy.deepcopy(newNode)
-                unloadNode.moves.append((currNode.currColumn, -1))
+                unloadNode.moves.append((topContainer.location[0], currNode.currColumn, -1, -1))
                 if len(unloadNode.toLoad) > 0:
                     toLoadContainer = unloadNode.toLoad.pop()
                     locationForLoad = return_left_most_empty_column_location(unloadNode)
                     unloadNode.ship[(locationForLoad[0] - 1)* maxCol + (locationForLoad[1] - 1)].name = toLoadContainer.name
                     unloadNode.ship[(locationForLoad[0] - 1)* maxCol + (locationForLoad[1] - 1)].weight = toLoadContainer.weight
-                    unloadNode.moves.append((-1, locationForLoad[1]))
+                    unloadNode.moves.append((-1, -1, locationForLoad[0], locationForLoad[1]))
                 if not exists(unloadNode.ship):
                     # print("State:")
                     # printShip(unloadNode.ship)
@@ -387,7 +389,7 @@ def expandUnload(givenNode, heap):
 
                     # print(len(repeatedStates))
                     nodeToPush = copy.deepcopy(newNode)
-                    nodeToPush.moves.append((currNode.currColumn, tempLocation[1]))
+                    nodeToPush.moves.append((topContainer.location[0],  currNode.currColumn, tempLocation[0], tempLocation[1]))
                     # if any(x == nodeToPush.ship for x in repeatedStates):#https://stackoverflow.com/questions/9371114/check-if-list-of-objects-contain-an-object-with-a-certain-attribute-value
                     if not exists(nodeToPush.ship):
                         # print("State:")
@@ -445,12 +447,17 @@ def unload(initialState):
 
 # ship[0] = Container((1,1),10,'Bob')
 # ship[12] = Container((2,1),20,'Bob2')
-# # ship[2] = Container((1,3),50,'Bob3')
-# # ship[3] = Container((1,4),30,'Bob4')
+# ship[2] = Container((1,3),50,'Bob3')
+# ship[3] = Container((1,4),30,'Bob4')
 # initialState = Node()
 # initialState.ship = ship
 # initialState.toUnload = ["Bob","Bob2"]
 # initialState.toLoad = [Container((0,0),30,'Bob3'), Container((0,0),40,'Bob4')]
+# ship = openFile()
+# initialState = Node()
+# initialState.ship = ship
+# initialState.toLoad = [Container((0,0),2,'Liz')]
+# initialState.toUnload = ['Cat','Dog']
 # print("Original:")
 # printShip(ship)
 # heap = []

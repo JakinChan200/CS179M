@@ -33,3 +33,8 @@
 .DS_Store
 *.txt
 .DS_Store
+.project
+.pydevproject
+*.pyc
+*.pyc
+__pycache__/readManifest.cpython-37.pyc

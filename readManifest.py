@@ -1,4 +1,4 @@
-import PySimpleGUI as sg
+# import PySimpleGUI as sg
 import os.path
 from tkinter import *
 from tkinter import filedialog
