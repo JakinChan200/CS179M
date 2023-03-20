@@ -45,11 +45,11 @@ def main_page(name, fileName):
         #Employee Name is blank before anyone logs in
         [sg.Text('',size = (0,15))],
         #Empty Line for Spacing
-        [sg.Button('Loading/Unloading',size=(10,2),pad = ((50,0),(0,0)),font = font), sg.Button('Balancing',pad = ((125,0),(0,0)),size=(10,3),font = font)],
+        [sg.Button('Load/Unload',size=(10,2),pad = ((50,0),(0,0)),font = font), sg.Button('Balance',pad = ((125,0),(0,0)),size=(10,2),font = font)],
          ##NOTE If ship name is long the title gets messed up
 
         #Loading and Unloading button the left, Balancing button on the right
-        # [sg.Text('',size = (0,15))],
+        [sg.Text('',size = (0,15))],
         [sg.Button('Comments',size=(10,2),font = ('Arial',14)), sg.Button('Upload',pad = (200,0),size = (10,2),font = ('Arial',14)),sg.Button('Login',size=(10,2),font = ('Arial',14))]
         #Comments button on the bottom left, Log in button on the bottom right
     ]
@@ -64,10 +64,10 @@ def main_page(name, fileName):
         elif event == 'Comments': #Employee clicks Comments button
             window.close()
             comments_page(name, fileName, 'main','','','')
-        elif event == 'Loading/Unloading': #Employee clicks Loading/Unloading button
+        elif event == 'Load/Unload': #Employee clicks Loading/Unloading button
             window.close()
             unloading_loading_page(name,fileName)
-        elif event == 'Balancing': #Employee clicks Balancing button
+        elif event == 'Balance': #Employee clicks Balancing button
             window.close()
             balancing_page(name,fileName)
         elif event == 'Upload': #Employee clicks Upload to upload manifest
@@ -193,10 +193,11 @@ def load_page(names,fileName,containers_to_unload):
     
     layout = [
     [sg.Text(fileName,font = font),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],
-    [sg.Text('Enter name and weight for containers to load',font = font)],
-    [sg.Text('Name',size = (15,1)),sg.InputText(key = 'input')],
-    [sg.Text('Weight',size = (15,1)),sg.InputText(key = 'input2')],
-    [sg.Button('Next',size = (10,2),font = ('Arial,14'))],
+    [sg.Text('Enter name and weight for containers to load:',font = font)],
+    [sg.Text('If there are no containers to load press "Done".',font = ('Arial',20))],
+    [sg.Text('Name',size = (15,1),font = font),sg.InputText(key = 'input')],
+    [sg.Text('Weight',size = (15,1),font = font),sg.InputText(key = 'input2')],
+    [sg.Button('Add container',size = (10,1),font = ('Arial,14'))],
     [sg.Button('Comments',size=(10,2),font = ('Arial',14)), sg.Button('Done',pad = (200,0),size = (10,2),font = ('Arial',14)),sg.Button('Login',size=(10,2),font = ('Arial',14))]
     ]
     window = sg.Window('Balancing Page', layout, size=(900, 700),finalize = True)
@@ -212,7 +213,7 @@ def load_page(names,fileName,containers_to_unload):
         elif event == 'Done':
             window.close()
             calculate_unload(names,fileName,toLoad,containers_to_unload)
-        elif event == 'Next':
+        elif event == 'Add container':
             toLoad.append(Container((0,0),values['input2'],values['input']))
             window['input'].update('')
             window['input2'].update('')
