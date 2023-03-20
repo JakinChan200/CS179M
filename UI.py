@@ -1,19 +1,3 @@
-# import PySimpleGUI as psg
-# names = ["Bob","Bob2"]
-# lst = psg.Listbox(names, size=(20, 4), font=('Arial Bold', 14), expand_y=True, enable_events=True, key='-LIST-',select_mode="multiple")
-# layout = [
-#    [lst],
-#    [psg.Text("", key='-MSG-', font=('Arial Bold', 14), justification='center')],
-#    [psg.Button('Exit')],
-# ]
-# window = psg.Window('Listbox Example', layout, size=(600, 200))
-# while True:
-#    event, values = window.read()
-#    if event in (psg.WIN_CLOSED, 'Exit'):
-#       print(values['-LIST-'])
-# window.close()
-
-
 import time
 import datetime as dt
 from readManifest import *
@@ -32,15 +16,13 @@ def writeToLog (fileName, comment):
     file.write('\n')
     file.close()
 
-
 def main_page(name, fileName):
     sg.theme('LightGray1')  #Can change theme https://www.geeksforgeeks.org/themes-in-pysimplegui/
     font = ('Arial', 30)
 
     names = name #Name of the employee logging in, passed in as argument of function
-
     layout = [
-        [sg.Text(fileName,font = font,),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],
+        [sg.Text(fileName,font = font),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],
         #File name on top left, Time in the center, and employee name at the right
         #Employee Name is blank before anyone logs in
         [sg.Text('',size = (0,15))],
@@ -82,6 +64,7 @@ def main_page(name, fileName):
 def upload_file(name):
     global manifest_ship
     manifest_ship = openFile()
+    writeToLog(logfile,getFileName() + " has been uploaded")
     main_page(name,getFileName())
 
 
@@ -331,6 +314,23 @@ def success_page(names, fileName):
 
     window.close()
 
+def success_page(names, fileName):
+    sg.theme('LightGray1')
+    font = ('Arial',30)
+    fileName = fileName[:-4]
+    outboundFileName = fileName + '_OUTBOUND.txt'
+    print(outboundFileName)
+    layout = [
+    [sg.Text(fileName,font = font),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],
+    [sg.Text('',size = (0,5))],
+    [sg.Text('Success! No more moves to make.',size = (0,3), font = ('Arial 25'), pad = (210,0))],
+    [sg.Text('',size = (0,5))],
+    [sg.Text('Please email ' + outboundFileName + ' to the captain.',size = (0,3), font = ('Arial 25'),pad = (125,0))],
+    [sg.Text('',size = (0,5))],
+    [sg.Text(outboundFileName + ' is available on the Desktop.',size = (0,3), font = ('Arial 25'),pad = (150,0))],
+    [sg.Text('',size = (0,5))],
+    [sg.Button('Comments',size=(10,2),font = ('Arial',14)), sg.Button('Done',pad = (200,0),size = (10,2),font = ('Arial',14)),sg.Button('Login',size=(10,2),font = ('Arial',14))]
+    ]
 
 def moves_page(names,fileName, resultNode):
     sg.theme('LightGray1')
@@ -369,7 +369,8 @@ def moves_page(names,fileName, resultNode):
     # [sg.Text('',size = (0,3))],
     [sg.Button('Comments',size=(10,2),font = ('Arial',14)), sg.Button('Done',pad = (200,0),size = (10,2),font = ('Arial',14)),sg.Button('Login',size=(10,2),font = ('Arial',14))]
     ]
-    window = sg.Window('Moves Page', layout, size=(900, 700),finalize = True)
+    window = sg.Window('Moves Page', layout, size=(900, 700),finalize = True)\
+    
     while True:
         event, values = window.read(timeout = 10)
         if event == 'Login': #Employee clicks Login button
@@ -388,8 +389,11 @@ def moves_page(names,fileName, resultNode):
     window.close()
 
 
+    window.close()
+
 def main():
     main_page('','') #First open main page with no employee name and no file name
+    # success_page('Ash', 'Login.txt') #Testing Success page
 if __name__ == '__main__':
     main()
 
