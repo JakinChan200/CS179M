@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from typing import Any
 from typing import NamedTuple
 import copy
-from readManifest import * 
+from readManifest import *
 
 
 #global variables
@@ -35,7 +35,7 @@ class Node:
         self.currColumn = currColumn
         self.currContainer = currContainer
         self.moves = moves
-    
+
     def __lt__(self, other):
         return self.g_n + self.h_n < other.g_n + other.h_n
 
@@ -92,7 +92,7 @@ def printWeights(ship):
 #     tree = queue.PriorityQueue(0)
 #     ship = numpy.empty([8, 12])
 #     buffer = numpy.empty([4, 24])
-    
+
 #     print('Hello World')
 def is_solvable(initialState):
     sum = 0.0
@@ -114,7 +114,7 @@ def checkBalanceGoal(ship):
     if leftWeight + rightWeight == 0: #Empty Ship or all weights are 0
         return True
     return min(leftWeight, rightWeight)/max(leftWeight, rightWeight) >= 0.9
-        
+
 #returns container at the top of the column given -- mod
 def return_top_container(currNode,column):
     index = 84 #replace with number of top left index
@@ -125,7 +125,7 @@ def return_top_container(currNode,column):
     return currNode.ship[index+(column - 1)]
 
 def return_top_available_cell_location(currNode,column):
-    index = 84 
+    index = 84
     while index >= 0:
         if currNode.ship[index + (column - 1)].name != 'UNUSED':  #If is NAN or Container
             tempLocation = (currNode.ship[index+(column - 1)].location[0] + 1, currNode.ship[index+(column - 1)].location[1])
@@ -149,7 +149,7 @@ def numContainers_on_ship(ship):
         if i.name != 'NAN' and i.name != 'UNUSED':
             count += 1
     return count
-            
+
 def exists(ship):
     for list_of_containers in repeatedStates:
         counter = 0
@@ -168,7 +168,7 @@ def group_up(lst, var_lst): #https://www.geeksforgeeks.org/python-convert-1d-lis
     for var_len in var_lst:
         yield lst[idx : idx + var_len]
         idx += var_len
-        
+
 def expandBalance(givenNode, heap, isSift):
     column = 1
     while column <= maxCol: #8 for the puzzle, temp 4
@@ -182,7 +182,7 @@ def expandBalance(givenNode, heap, isSift):
                 newNode = copy.deepcopy(currNode)
                 newNode.currContainer = topContainer
                 #currNode.ship[(row - 1)* column - 1]
-                newNode.ship[(topContainer.location[0] - 1)* maxCol + (topContainer.location[1] - 1)].name = "UNUSED" 
+                newNode.ship[(topContainer.location[0] - 1)* maxCol + (topContainer.location[1] - 1)].name = "UNUSED"
                 newNode.ship[(topContainer.location[0] - 1)* maxCol + (topContainer.location[1] - 1)].weight = 0
                 #Put down container
                 innerColumn = 1
@@ -207,12 +207,12 @@ def expandBalance(givenNode, heap, isSift):
                     nodeToPush = copy.deepcopy(newNode)
                     nodeToPush.moves.append((topContainer.location[0], currNode.currColumn, tempLocation[0], tempLocation[1]))
                     # if any(x == nodeToPush.ship for x in repeatedStates):#https://stackoverflow.com/questions/9371114/check-if-list-of-objects-contain-an-object-with-a-certain-attribute-value
-                    if not exists(nodeToPush.ship): 
+                    if not exists(nodeToPush.ship):
                         if isSift:
-                            nodeToPush.h_n = ComputeSIFTMisplacedTile(nodeToPush,SIFT(nodeToPush.ship))   
-                        heapq.heappush(heap,nodeToPush) 
+                            nodeToPush.h_n = ComputeSIFTMisplacedTile(nodeToPush,SIFT(nodeToPush.ship))
+                        heapq.heappush(heap,nodeToPush)
                         repeatedStates.append(nodeToPush.ship)
-                    newNode.ship[(tempLocation[0] - 1)* maxCol + (tempLocation[1] - 1)].name = "UNUSED" 
+                    newNode.ship[(tempLocation[0] - 1)* maxCol + (tempLocation[1] - 1)].name = "UNUSED"
                     newNode.ship[(tempLocation[0] - 1)* maxCol + (tempLocation[1] - 1)].weight = 0
         column = column + 1
 
@@ -244,8 +244,8 @@ def doSIFT(initialState):
         else:
             #expand node
             expandBalance(currState, heap, True)
-            
-def SIFT(SIFT_ship):       
+
+def SIFT(SIFT_ship):
     var_lst = []
     ship = []
     for container in SIFT_ship:
@@ -270,7 +270,7 @@ def SIFT(SIFT_ship):
             new_divided_ship[nested_index][int(left_pointer)] = ship[ship_pointer]
             left_pointer -= 1
             ship_pointer += 1
-            
+
             new_divided_ship[nested_index][int(right_pointer)] = ship[ship_pointer]
             right_pointer += 1
             ship_pointer += 1
@@ -344,7 +344,7 @@ def expandUnload(givenNode, heap):
                 newNode = copy.deepcopy(currNode)
                 newNode.currContainer = topContainer
                 #currNode.ship[(row - 1)* column - 1]
-                newNode.ship[(topContainer.location[0] - 1)* maxCol + (topContainer.location[1] - 1)].name = "UNUSED" 
+                newNode.ship[(topContainer.location[0] - 1)* maxCol + (topContainer.location[1] - 1)].name = "UNUSED"
                 newNode.ship[(topContainer.location[0] - 1)* maxCol + (topContainer.location[1] - 1)].weight = 0
                 #Put down container
                 innerColumn = 1
@@ -358,6 +358,8 @@ def expandUnload(givenNode, heap):
                     unloadNode.ship[(locationForLoad[0] - 1)* maxCol + (locationForLoad[1] - 1)].weight = toLoadContainer.weight
                     unloadNode.moves.append((-1, -1, locationForLoad[0], locationForLoad[1]))
                 if not exists(unloadNode.ship): 
+                    unloadNode.moves.append((-1, locationForLoad[1]))
+                if not exists(unloadNode.ship):
                     # print("State:")
                     # printShip(unloadNode.ship)
                     for containerToUnload in unloadNode.toUnload:
@@ -391,13 +393,13 @@ def expandUnload(givenNode, heap):
                     nodeToPush = copy.deepcopy(newNode)
                     nodeToPush.moves.append((topContainer.location[0],  currNode.currColumn, tempLocation[0], tempLocation[1]))
                     # if any(x == nodeToPush.ship for x in repeatedStates):#https://stackoverflow.com/questions/9371114/check-if-list-of-objects-contain-an-object-with-a-certain-attribute-value
-                    if not exists(nodeToPush.ship): 
+                    if not exists(nodeToPush.ship):
                         # print("State:")
                         # printShip(nodeToPush.ship)
                         # nodeToPush.h_n = calculateManhattanDist(topContainer.location, tempLocation) + len(nodeToPush.toUnload)
-                        heapq.heappush(heap,nodeToPush) 
+                        heapq.heappush(heap,nodeToPush)
                         repeatedStates.append(nodeToPush.ship)
-                    newNode.ship[(tempLocation[0] - 1)* maxCol + (tempLocation[1] - 1)].name = "UNUSED" 
+                    newNode.ship[(tempLocation[0] - 1)* maxCol + (tempLocation[1] - 1)].name = "UNUSED"
                     newNode.ship[(tempLocation[0] - 1)* maxCol + (tempLocation[1] - 1)].weight = 0
         column = column + 1
 
@@ -444,7 +446,7 @@ def unload(initialState):
 #         ship.append(Container((i,j),0,'UNUSED'))
 #         j+=1
 #     i+=1
-     
+
 # ship[0] = Container((1,1),10,'Bob')
 # ship[12] = Container((2,1),20,'Bob2')
 # ship[2] = Container((1,3),50,'Bob3')
@@ -495,9 +497,9 @@ def unload(initialState):
 # numpy.array(cell, )
 
 # if __name__ == '__main__':
-    
+
 #     # ship[0][3] = "Joe"
-    
+
 #     algorithm()
 #     balance(ship, buffer)
 

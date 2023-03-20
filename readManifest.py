@@ -21,7 +21,8 @@ def openFile():
     ship = readFile(file)
     file.close()
     return ship
-    
+
+
 def getFileName():
     return os.path.basename(file.name)
 
@@ -29,7 +30,7 @@ def getFileName():
         Inputs: text file -- manifest that contains information about containers on ships
         Output: list of containers on the ship
 '''
-def readFile(file):
+def readFile(file): #takes in an open file
     containers = file.readlines()
     currLine = 0
     Containers = []
@@ -48,4 +49,3 @@ def readFile(file):
         currContainer = Container((x_location, y_location), weight, name)
         Containers.append(currContainer)
     return Containers
-
