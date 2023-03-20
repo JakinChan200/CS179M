@@ -1,4 +1,4 @@
-import numpy
+#import numpy
 import queue
 import heapq
 from dataclasses import dataclass, field
@@ -75,7 +75,7 @@ def printWeights(ship):
 
 #print(ship[1].location[0]) #Outputs 1
 # ship = openFile()
-# 
+#
 # print("Original:")
 # printShip(ship)
 # print(ship[1].printContainer())
@@ -330,7 +330,7 @@ def balance(initialState):
 # initialState2.ship = ship
 # balance(initialState2)
 # print(checkSIFTGoal(ship,SIFT(ship)))
- 
+
 def expandUnload(givenNode, heap):
     column = 1
     while column <= maxCol: #8 for the puzzle, temp 4

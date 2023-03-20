@@ -3,6 +3,7 @@ import datetime as dt
 from readManifest import *
 from algorithm import *
 import PySimpleGUI as sg
+from updateManifest import *
 
 manifest_ship = []
 
@@ -97,7 +98,7 @@ def signin_page(name, fileName, function_call,containers_to_unload,toLoad,unLoad
         calculate_unload(values[0],fileName,toLoad,unLoad)
     elif function_call == 'success':
         success_page(values[0],fileName)
-        
+
 
 
 def comments_page(name, fileName,function_call,containers_to_unload,toLoad,unLoad): #function_call tells which function is calling this function
@@ -140,7 +141,7 @@ def unloading_loading_page(names,fileName):
     for i in manifest_ship:
         if i.name != 'UNUSED' and i.name != 'NAN':
             name.append(i.name)
-            
+
     lst = sg.Listbox(name, size=(20, 4), font=('Arial Bold', 14), expand_y=True, enable_events=True, key='-LIST-',select_mode="multiple")
 
     layout = [
@@ -151,7 +152,7 @@ def unloading_loading_page(names,fileName):
     [sg.Button('Comments',size=(10,2),font = ('Arial',14)), sg.Button('Done',pad = (200,0),size = (10,2),font = ('Arial',14)),sg.Button('Login',size=(10,2),font = ('Arial',14))]
     ]
 
-    
+
     window = sg.Window('Loading Unloading Page', layout, size=(900, 700),finalize = True)
     while True:
         event, values = window.read(timeout = 10)
@@ -172,12 +173,12 @@ def unloading_loading_page(names,fileName):
 
         #TODO add implementation for done button
     window.close()
-    
+
 def load_page(names,fileName,containers_to_unload):
     sg.theme('LightGray1')
     font = ('Arial',30)
     toLoad= []
-    
+
     layout = [
     [sg.Text(fileName,font = font),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],
     [sg.Text('Enter name and weight for containers to load:',font = font)],
@@ -201,7 +202,7 @@ def load_page(names,fileName,containers_to_unload):
             window.close()
             calculate_unload(names,fileName,toLoad,containers_to_unload)
         elif event == 'Add container':
-            toLoad.append(Container((0,0),values['input2'],values['input']))
+            toLoad.append(Container((0,0),int(values['input2']),values['input']))
             window['input'].update('')
             window['input2'].update('')
         elif event == sg.WIN_CLOSED: #Employee clicks the X on the program
@@ -209,11 +210,11 @@ def load_page(names,fileName,containers_to_unload):
         window['time'].update(time.strftime('%H:%M:%S')) #Update clock in real time (Military time, local time)
 
     window.close()
-    
+
 def calculate_unload(names,fileName,toLoad,unLoad):
     sg.theme('LightGray1')
     font = ('Arial',30)
-    
+
     layout = [
     [sg.Text(fileName,font = font),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],
     [sg.Text('',size = (0,3))],
@@ -227,6 +228,7 @@ def calculate_unload(names,fileName,toLoad,unLoad):
     initialState.toLoad = toLoad
     initialState.toUnload = unLoad
     finished_state = unload(initialState)
+    writeManifest(fileName, finished_state.ship)
     while True:
         event, values = window.read(timeout = 10)
         if event == 'Login': #Employee clicks Login button
@@ -243,8 +245,8 @@ def calculate_unload(names,fileName,toLoad,unLoad):
         window['time'].update(time.strftime('%H:%M:%S')) #Update clock in real time (Military time, local time)
 
     window.close()
-    
-    
+
+
 
 def balancing_page(names,fileName):
     sg.theme('LightGray1')
@@ -261,6 +263,7 @@ def balancing_page(names,fileName):
     initialState = Node()
     initialState.ship = manifest_ship
     balanced_result = balance(initialState)
+    writeManifest(fileName, balanced_result.ship)
     while True:
         event, values = window.read(timeout = 10)
         if event == 'Login': #Employee clicks Login button
@@ -277,7 +280,7 @@ def balancing_page(names,fileName):
         window['time'].update(time.strftime('%H:%M:%S')) #Update clock in real time (Military time, local time)
 
     window.close()
-    
+
 def success_page(names, fileName):
     sg.theme('LightGray1')
     font = ('Arial',30)
@@ -370,7 +373,7 @@ def moves_page(names,fileName, resultNode):
     [sg.Button('Comments',size=(10,2),font = ('Arial',14)), sg.Button('Done',pad = (200,0),size = (10,2),font = ('Arial',14)),sg.Button('Login',size=(10,2),font = ('Arial',14))]
     ]
     window = sg.Window('Moves Page', layout, size=(900, 700),finalize = True)\
-    
+
     while True:
         event, values = window.read(timeout = 10)
         if event == 'Login': #Employee clicks Login button
@@ -396,4 +399,3 @@ def main():
     # success_page('Ash', 'Login.txt') #Testing Success page
 if __name__ == '__main__':
     main()
-
