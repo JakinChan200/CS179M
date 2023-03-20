@@ -358,7 +358,7 @@ def expandUnload(givenNode, heap):
                     unloadNode.ship[(locationForLoad[0] - 1)* maxCol + (locationForLoad[1] - 1)].weight = toLoadContainer.weight
                     unloadNode.moves.append((-1, -1, locationForLoad[0], locationForLoad[1]))
                 if not exists(unloadNode.ship): 
-                    unloadNode.moves.append((-1, locationForLoad[1]))
+                    unloadNode.moves.append((-1, -1, locationForLoad[0], locationForLoad[1]))
                 if not exists(unloadNode.ship):
                     # print("State:")
                     # printShip(unloadNode.ship)
