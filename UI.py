@@ -100,7 +100,6 @@ def signin_page(name, fileName, function_call,containers_to_unload,toLoad,unLoad
         success_page(values[0],fileName)
 
 
-
 def comments_page(name, fileName,function_call,containers_to_unload,toLoad,unLoad): #function_call tells which function is calling this function
     sg.theme('LightGray1')  #Can change theme https://www.geeksforgeeks.org/themes-in-pysimplegui/
     font = ('Arial',15)
@@ -151,7 +150,6 @@ def unloading_loading_page(names,fileName):
     [sg.Text('',size = (0,3))],
     [sg.Button('Comments',size=(10,2),font = ('Arial',14)), sg.Button('Done',pad = (200,0),size = (10,2),font = ('Arial',14)),sg.Button('Login',size=(10,2),font = ('Arial',14))]
     ]
-
 
     window = sg.Window('Loading Unloading Page', layout, size=(900, 700),finalize = True)
     while True:
@@ -246,8 +244,6 @@ def calculate_unload(names,fileName,toLoad,unLoad):
 
     window.close()
 
-
-
 def balancing_page(names,fileName):
     sg.theme('LightGray1')
     font = ('Arial',30)
@@ -317,24 +313,6 @@ def success_page(names, fileName):
 
     window.close()
 
-def success_page(names, fileName):
-    sg.theme('LightGray1')
-    font = ('Arial',30)
-    fileName = fileName[:-4]
-    outboundFileName = fileName + '_OUTBOUND.txt'
-    print(outboundFileName)
-    layout = [
-    [sg.Text(fileName,font = font),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],
-    [sg.Text('',size = (0,5))],
-    [sg.Text('Success! No more moves to make.',size = (0,3), font = ('Arial 25'), pad = (210,0))],
-    [sg.Text('',size = (0,5))],
-    [sg.Text('Please email ' + outboundFileName + ' to the captain.',size = (0,3), font = ('Arial 25'),pad = (125,0))],
-    [sg.Text('',size = (0,5))],
-    [sg.Text(outboundFileName + ' is available on the Desktop.',size = (0,3), font = ('Arial 25'),pad = (150,0))],
-    [sg.Text('',size = (0,5))],
-    [sg.Button('Comments',size=(10,2),font = ('Arial',14)), sg.Button('Done',pad = (200,0),size = (10,2),font = ('Arial',14)),sg.Button('Login',size=(10,2),font = ('Arial',14))]
-    ]
-
 def moves_page(names,fileName, resultNode):
     sg.theme('LightGray1')
     font = ('Arial',30)
@@ -388,9 +366,6 @@ def moves_page(names,fileName, resultNode):
         elif event == sg.WIN_CLOSED: #Employee clicks the X on the program
             exit()
         window['time'].update(time.strftime('%H:%M:%S')) #Update clock in real time (Military time, local time)
-
-    window.close()
-
 
     window.close()
 
