@@ -127,8 +127,10 @@ def signin_page(name, fileName, function_call,containers_to_unload,toLoad,unLoad
     loginName = values[0] + " signs in"
     writeToLog(logfile, loginName)
     if function_call == 'main':
+        newname = values[0]
         main_page(values[0],fileName) #Open the main page after closing the sign in page, passing in the name typed in as argument
     elif function_call == 'load unload':
+        newname = values[0]
         unloading_loading_page(values[0],fileName)
     elif function_call == 'balance':
         newname = values[0]
@@ -137,9 +139,10 @@ def signin_page(name, fileName, function_call,containers_to_unload,toLoad,unLoad
     elif function_call == 'moves':
         newname = values[0]
     elif function_call == 'load page':
+        newname = values[0]
         load_page(values[0],fileName,containers_to_unload)
     elif function_call == 'success':
-        success_page(values[0],fileName)
+        newname = values[0]
 
 
 def comments_page(name, fileName,function_call,containers_to_unload,toLoad,unLoad,resultNode): #function_call tells which function is calling this function
@@ -163,8 +166,6 @@ def comments_page(name, fileName,function_call,containers_to_unload,toLoad,unLoa
         unloading_loading_page(name,fileName)
     elif function_call == 'load page':
         load_page(name,fileName,containers_to_unload)
-    elif function_call == 'success':
-        success_page(name,fileName)
 
 def unloading_loading_page(names,fileName):
     sg.theme('LightGray1')
@@ -250,7 +251,7 @@ def calculate_unload(names,fileName,toLoad,unLoad):
     font = ('Arial',30)
 
     layout = [
-    [sg.Text(fileName,font = font),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)),key = "login")],
+    [sg.Text(fileName,font = font),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)),key = 'login')],
     [sg.Text('',size = (0,3))],
 #     [sg.Text('Calculating Loading and Unloading of Ship',font = font, size = (0,3))],
     [sg.Text('Estimated Time (At Most):',font = font, size = (0,1))],
@@ -333,6 +334,7 @@ def balancing_page(names,fileName):
     window.close()
 
 def success_page(names, fileName):
+    global newname
     global uploaded
     sg.theme('LightGray1')
     font = ('Arial',30)
@@ -341,7 +343,7 @@ def success_page(names, fileName):
     outboundFileName = shortenedfileName + '_OUTBOUND.txt'
     writeToLog(logfile,"Finished a Cycle. Manifest " + outboundFileName + " was written to desktop, and a reminder to operator to send file was displayed.")
     layout = [
-    [sg.Text(fileName,font = font),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],
+    [sg.Text(fileName,font = font),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)),key = 'login')],
     [sg.Text('',size = (0,5))],
     [sg.Text('Success! No more moves to make.',size = (0,3), font = ('Arial 25'), pad = (210,0))],
     [sg.Text('',size = (0,5))],
@@ -356,18 +358,17 @@ def success_page(names, fileName):
     while True:
         event, values = window.read(timeout = 10)
         if event == 'Login': #Employee clicks Login button
-            window.close()
             signin_page(names, fileName, 'success','','','','')
         elif event == 'Comments': #Employee clicks Comments button
-            window.close()
             comments_page(names,fileName,'success','','','','')
         elif event == sg.WIN_CLOSED: #Employee clicks the X on the program
             exit()
         elif event == 'Done':
             window.close()
             uploaded = False
-            main_page(names, '')
+            main_page(newname, '')
         window['time'].update(time.strftime('%H:%M:%S')) #Update clock in real time (Military time, local time)
+        window['login'].update(newname)
 
     window.close()
 
