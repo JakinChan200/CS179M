@@ -15,10 +15,27 @@ signedIn = False
 def writeToLog (fileName, comment):
     date = dt.datetime.now()
     file = open(fileName, 'a')
-    file.write(date.strftime('%B %d, %Y') + ": " + time.strftime('%H:%M:%S') + ' ' )
+    file.write(date.strftime('%B %d, %Y') + ": " + time.strftime('%H:%M:%S') + ' ' ) #https://www.programiz.com/python-programming/datetime/strftime
     file.write(comment)
     file.write('\n')
     file.close()
+
+def start_page():
+    global logfile
+    sg.theme('LightGray1')  #Can change theme https://www.geeksforgeeks.org/themes-in-pysimplegui/
+    font = ('Arial',15)
+
+    layout = [
+    [sg.Text('Enter log file name',font = font)],
+    [sg.Text('Log file name', font = font), sg.InputText(size=(50,10),expand_y = True)], #Text box for signing in
+    [sg.Submit(), sg.Cancel()] #Submit button and hitting enter both submits the text
+    ]
+    window = sg.Window('Start Page', layout)
+    event, values = window.read()
+    logfile = values[0] + ".txt"
+    window.close()
+    main_page('','')
+    
 
 def main_page(name, fileName):
     global uploaded
@@ -45,7 +62,8 @@ def main_page(name, fileName):
     window = sg.Window('Main Page', layout, size=(900, 700),finalize = True)
 
     while True:
-        event, values = window.read(timeout=10) #Timeout is required for updating clock
+        event, values = window.read(timeout=10) #Timeout is required for updating clock 
+        #https://gist.github.com/KenoLeon/907a4df79e5be20a1ffb37617f00d2e4
         if event == 'Login': #Employee clicks Login button
             window.close()
             signin_page(name,fileName,'main','','','')
@@ -66,13 +84,14 @@ def main_page(name, fileName):
         elif event == sg.WIN_CLOSED: #Employee clicks the X on the program
             exit()
         window['time'].update(time.strftime('%H:%M:%S')) #Update clock in real time (Military time, local time)
+        #https://gist.github.com/KenoLeon/907a4df79e5be20a1ffb37617f00d2e4
 
     window.close()
 
 def upload_file(name):
     global uploaded
-    count = 0
     global manifest_ship
+    count = 0
     manifest_ship = openFile()
     for container in manifest_ship:
         if container.name != 'NAN' and container.name != 'UNUSED':
@@ -144,7 +163,6 @@ def comments_page(name, fileName,function_call,containers_to_unload,toLoad,unLoa
         calculate_unload(name,fileName,toLoad,unLoad)
     elif function_call == 'success':
         success_page(name,fileName)
-    #TODO: Add variable to store the comments made
 
 def unloading_loading_page(names,fileName):
     sg.theme('LightGray1')
@@ -157,7 +175,7 @@ def unloading_loading_page(names,fileName):
             name.append(i.name)
 
     lst = sg.Listbox(name, size=(20, 4), font=('Arial Bold', 14), expand_y=True, enable_events=True, key='-LIST-',select_mode="multiple")
-
+    #https://www.tutorialspoint.com/pysimplegui/pysimplegui_listbox_element.htm
     layout = [
     [sg.Text(fileName,font = font),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],
     [sg.Text('',size = (0,3))],
@@ -185,7 +203,6 @@ def unloading_loading_page(names,fileName):
             exit()
         window['time'].update(time.strftime('%H:%M:%S')) #Update clock in real time (Military time, local time)
 
-        #TODO add implementation for done button
     window.close()
 
 def load_page(names,fileName,containers_to_unload):
@@ -358,8 +375,8 @@ def moves_page(names,fileName, resultNode):
     curr_move = 0
     if len(resultNode.moves) != 0:
         string_node_result = ','.join(str(move) for move in resultNode.moves) #(1,2,1,8) with parenthesis and commas
+        #https://stackoverflow.com/questions/5618878/how-to-convert-list-to-string
         string_node_result = re.sub(" ", "", string_node_result)
-
 
         list_of_moves = re.findall("-?\d+", string_node_result)
 
@@ -386,7 +403,7 @@ def moves_page(names,fileName, resultNode):
     else:
         string_of_instructions = "No Moves\n"
     list_of_instructions = re.findall("[^\n]+\n", string_of_instructions) #list of strings that have instructions
-    print(list_of_instructions)
+#     print(list_of_instructions)
 
     layout = [
     [sg.Text(fileName,font = font),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],
@@ -424,7 +441,8 @@ def moves_page(names,fileName, resultNode):
     window.close()
 
 def main():
-    main_page('','') #First open main page with no employee name and no file name
+    start_page()
+#     main_page('','') #First open main page with no employee name and no file name
     # success_page('Ash', 'Login.txt') #Testing Success page
 if __name__ == '__main__':
     main()

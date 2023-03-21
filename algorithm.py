@@ -1,9 +1,9 @@
 #import numpy
 import queue
 import heapq
-from dataclasses import dataclass, field
-from typing import Any
-from typing import NamedTuple
+# from dataclasses import dataclass, field
+# from typing import Any
+# from typing import NamedTuple
 import copy
 from readManifest import *
 
@@ -228,7 +228,6 @@ def expandBalance(givenNode, heap, isSift):
                     # print(len(repeatedStates))
                     nodeToPush = copy.deepcopy(newNode)
                     nodeToPush.moves.append((topContainer.location[0], currNode.currColumn, tempLocation[0], tempLocation[1]))
-                    # if any(x == nodeToPush.ship for x in repeatedStates):#https://stackoverflow.com/questions/9371114/check-if-list-of-objects-contain-an-object-with-a-certain-attribute-value
                     if not exists(nodeToPush.ship):
                         if isSift:
                             nodeToPush.h_n = ComputeSIFTMisplacedTile(nodeToPush,SIFT(nodeToPush.ship))
@@ -451,10 +450,10 @@ def unload(initialState):
         # print()
         # print("G_n + H_N", currState.g_n + currState.h_n)
         if len(currState.toLoad) == 0 and len(currState.toUnload) == 0 and original_num_containers + original_to_Load - original_to_Unload == numContainers_on_ship(currState.ship):
-            for i in currState.moves:
-                print(i)
-            print("Answer:")
-            printShip(currState.ship)
+#             for i in currState.moves:
+#                 print(i)
+#             print("Answer:")
+#             printShip(currState.ship)
             return currState
         else:
             #expand node
