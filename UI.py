@@ -135,7 +135,7 @@ def signin_page(name, fileName, function_call,containers_to_unload,toLoad,unLoad
     elif function_call == 'calculate unload':
         newname = values[0]
     elif function_call == 'moves':
-        moves_page(values[0],fileName,resultNode)
+        newname = values[0]
     elif function_call == 'load page':
         load_page(values[0],fileName,containers_to_unload)
     elif function_call == 'success':
@@ -161,8 +161,6 @@ def comments_page(name, fileName,function_call,containers_to_unload,toLoad,unLoa
         main_page(name, fileName)   #Open the main page after closing the comments page, passing in the name typed in as argument
     elif function_call == 'load unload':
         unloading_loading_page(name,fileName)
-    elif function_call == 'moves':
-        moves_page(name,fileName,resultNode)
     elif function_call == 'load page':
         load_page(name,fileName,containers_to_unload)
     elif function_call == 'success':
@@ -374,6 +372,7 @@ def success_page(names, fileName):
     window.close()
 
 def moves_page(names,fileName, resultNode):
+    global moves
     sg.theme('LightGray1')
     font = ('Arial',30)
     curr_move = 0
@@ -410,7 +409,7 @@ def moves_page(names,fileName, resultNode):
 #     print(list_of_instructions)
 
     layout = [
-    [sg.Text(fileName,font = font),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],
+    [sg.Text(fileName,font = font),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)),key = 'login')],
     [sg.Text(list_of_instructions[curr_move],font = font,size = (800,15), key = 'Update moves')],
     # [sg.Text('',size = (0,3))],
     # [sg.Text('Calculating Balance of Ship',size = (0,3))],
@@ -423,14 +422,12 @@ def moves_page(names,fileName, resultNode):
     while True:
         event, values = window.read(timeout = 10)
         if event == 'Login': #Employee clicks Login button
-            window.close()
             signin_page(names, fileName, 'moves','','','',resultNode)
         elif event == 'Comments': #Employee clicks Comments button
-            window.close()
             comments_page(names,fileName,'moves','','','',resultNode)
         elif event == 'Done':
             window.close()
-            success_page(names,fileName)
+            success_page(newname,fileName)
         elif event == 'Next Move':
             if curr_move < len(list_of_instructions) - 1:
                 curr_move += 1
@@ -441,6 +438,7 @@ def moves_page(names,fileName, resultNode):
         elif event == sg.WIN_CLOSED: #Employee clicks the X on the program
             exit()
         window['time'].update(time.strftime('%H:%M:%S')) #Update clock in real time (Military time, local time)
+        window['login'].update(newname)
 
     window.close()
 
