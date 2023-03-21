@@ -36,6 +36,8 @@ def start_page():
     window = sg.Window('Start Page', layout)
     event, values = window.read()
     logfile = values[0] + ".txt"
+    if event == 'Cancel':
+        exit()
     save_path = values[1]
     window.close()
     main_page('','')
