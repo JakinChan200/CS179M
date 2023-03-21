@@ -64,9 +64,13 @@ def main_page(name, fileName):
     window.close()
 
 def upload_file(name):
+    count = 0
     global manifest_ship
     manifest_ship = openFile()
-    writeToLog(logfile,getFileName() + " has been uploaded")
+    for container in manifest_ship:
+        if container.name != 'NAN' and container.name != 'UNUSED':
+            count += 1
+    writeToLog(logfile,getFileName() + " has been uploaded, there are " + count + " containers on the ship")
     main_page(name,getFileName())
 
 
@@ -306,6 +310,7 @@ def success_page(names, fileName):
     shortenedfileName = copy.deepcopy(fileName)
     shortenedfileName = shortenedfileName[:-4]
     outboundFileName = shortenedfileName + '_OUTBOUND.txt'
+    writeToLog(logfile,"Finished a Cycle. Manifest " + outboundFileName + " was written to desktop, and a reminder to operator to send file was displayed.")
     layout = [
     [sg.Text(fileName,font = font),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],
     [sg.Text('',size = (0,5))],
