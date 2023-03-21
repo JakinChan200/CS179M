@@ -1,5 +1,6 @@
 import time
 import datetime as dt
+import math
 from readManifest import *
 from algorithm import *
 import PySimpleGUI as sg
@@ -255,7 +256,9 @@ def balancing_page(names,fileName):
     layout = [
     [sg.Text(fileName,font = font),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],
     [sg.Text('',size = (0,3))],
-    [sg.Text('Calculating Balance of Ship',font = font, size = (0,3))],
+#     [sg.Text('Calculating Balance of Ship',font = font, size = (0,3))],
+    [sg.Text('Estimated Time:',font = font, size = (0,1))],
+    [sg.Text('',font = font, size = (800,1), key = 'estimation')],
     [sg.Text('',size = (0,3))],
     [sg.Button('Comments',size=(10,2),font = ('Arial',14)), sg.Button('Done',pad = (200,0),size = (10,2),font = ('Arial',14)),sg.Button('Login',size=(10,2),font = ('Arial',14))]
     ]
@@ -264,6 +267,9 @@ def balancing_page(names,fileName):
     initialState.ship = manifest_ship
     balanced_result = balance(initialState)
     writeManifest(fileName, balanced_result.ship)
+    times = estimate_time(balanced_result.moves)
+    hours = math.floor(times/60)
+    minutes = times % 60
     while True:
         event, values = window.read(timeout = 10)
         if event == 'Login': #Employee clicks Login button
@@ -278,6 +284,8 @@ def balancing_page(names,fileName):
         elif event == sg.WIN_CLOSED: #Employee clicks the X on the program
             exit()
         window['time'].update(time.strftime('%H:%M:%S')) #Update clock in real time (Military time, local time)
+        window['estimation'].update(str(hours) + ' hours ' + str(minutes) + ' minutes' )
+        
 
     window.close()
 
@@ -388,9 +396,6 @@ def moves_page(names,fileName, resultNode):
         elif event == sg.WIN_CLOSED: #Employee clicks the X on the program
             exit()
         window['time'].update(time.strftime('%H:%M:%S')) #Update clock in real time (Military time, local time)
-
-    window.close()
-
 
     window.close()
 
