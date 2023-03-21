@@ -70,7 +70,7 @@ def upload_file(name):
     for container in manifest_ship:
         if container.name != 'NAN' and container.name != 'UNUSED':
             count += 1
-    writeToLog(logfile,getFileName() + " has been uploaded, there are " + count + " containers on the ship")
+    writeToLog(logfile,getFileName() + " has been uploaded, there are " + str(count) + " containers on the ship")
     main_page(name,getFileName())
 
 
@@ -300,7 +300,7 @@ def balancing_page(names,fileName):
             exit()
         window['time'].update(time.strftime('%H:%M:%S')) #Update clock in real time (Military time, local time)
         window['estimation'].update(str(hours) + ' hours ' + str(minutes) + ' minutes' )
-        
+
 
     window.close()
 
@@ -344,13 +344,14 @@ def success_page(names, fileName):
 def moves_page(names,fileName, resultNode):
     sg.theme('LightGray1')
     font = ('Arial',30)
-    if len(resultNode.moves) != 0:   
+    curr_move = 0
+    if len(resultNode.moves) != 0:
         string_node_result = ','.join(str(move) for move in resultNode.moves) #(1,2,1,8) with parenthesis and commas
         string_node_result = re.sub(" ", "", string_node_result)
-    
-    
+
+
         list_of_moves = re.findall("-?\d+", string_node_result)
-    
+
         string_of_moves = ""
         iteration = 1
         for i in list_of_moves:
@@ -372,17 +373,21 @@ def moves_page(names,fileName, resultNode):
                 string_of_instructions += "Move " + i
             iteration += 1
     else:
-        string_of_instructions = "No Moves"
+        string_of_instructions = "No Moves\n"
+    list_of_instructions = re.findall("[^\n]+\n", string_of_instructions) #list of strings that have instructions
+    print(list_of_instructions)
+
     layout = [
     [sg.Text(fileName,font = font),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],
-    [sg.Text(string_of_instructions,font = font,size = (800,15))],
+    [sg.Text(list_of_instructions[curr_move],font = font,size = (800,15), key = 'Update moves')],
     # [sg.Text('',size = (0,3))],
     # [sg.Text('Calculating Balance of Ship',size = (0,3))],
     # [sg.Text('',size = (0,3))],
+    [sg.Button('Next Move', size=(10,1), font = ('Arial',14))],
     [sg.Button('Comments',size=(10,2),font = ('Arial',14)), sg.Button('Done',pad = (200,0),size = (10,2),font = ('Arial',14)),sg.Button('Login',size=(10,2),font = ('Arial',14))]
     ]
     window = sg.Window('Moves Page', layout, size=(900, 700),finalize = True)
-
+    writeToLog(logfile, list_of_instructions[curr_move][:-1])
     while True:
         event, values = window.read(timeout = 10)
         if event == 'Login': #Employee clicks Login button
@@ -394,6 +399,13 @@ def moves_page(names,fileName, resultNode):
         elif event == 'Done':
             window.close()
             success_page(names,fileName)
+        elif event == 'Next Move':
+            if curr_move < len(list_of_instructions) - 1:
+                curr_move += 1
+                writeToLog(logfile, list_of_instructions[curr_move][:-1])
+                window['Update moves'].update(list_of_instructions[curr_move])
+            else:
+                window['Update moves'].update("No more moves to make.")
         elif event == sg.WIN_CLOSED: #Employee clicks the X on the program
             exit()
         window['time'].update(time.strftime('%H:%M:%S')) #Update clock in real time (Military time, local time)
