@@ -9,6 +9,8 @@ from updateManifest import *
 manifest_ship = []
 
 logfile = "Logfile_2022.txt" #temp var-- change to ask file name when program starts
+uploaded = False
+signedIn = False
 
 def writeToLog (fileName, comment):
     date = dt.datetime.now()
@@ -19,6 +21,8 @@ def writeToLog (fileName, comment):
     file.close()
 
 def main_page(name, fileName):
+    global uploaded
+    global signedIn
     sg.theme('LightGray1')  #Can change theme https://www.geeksforgeeks.org/themes-in-pysimplegui/
     font = ('Arial', 30)
 
@@ -49,11 +53,13 @@ def main_page(name, fileName):
             window.close()
             comments_page(name, fileName, 'main','','','')
         elif event == 'Load/Unload': #Employee clicks Loading/Unloading button
-            window.close()
-            unloading_loading_page(name,fileName)
+            if uploaded and signedIn:
+                window.close()
+                unloading_loading_page(name,fileName)
         elif event == 'Balance': #Employee clicks Balancing button
-            window.close()
-            balancing_page(name,fileName)
+            if uploaded and signedIn:
+                window.close()
+                balancing_page(name,fileName)
         elif event == 'Upload': #Employee clicks Upload to upload manifest
             window.close()
             upload_file(name)
@@ -64,6 +70,7 @@ def main_page(name, fileName):
     window.close()
 
 def upload_file(name):
+    global uploaded
     count = 0
     global manifest_ship
     manifest_ship = openFile()
@@ -71,10 +78,12 @@ def upload_file(name):
         if container.name != 'NAN' and container.name != 'UNUSED':
             count += 1
     writeToLog(logfile,getFileName() + " has been uploaded, there are " + str(count) + " containers on the ship")
+    uploaded = True
     main_page(name,getFileName())
 
 
 def signin_page(name, fileName, function_call,containers_to_unload,toLoad,unLoad): #function_call tells which function is calling this function
+    global signedIn
     sg.theme('LightGray1')  #Can change theme https://www.geeksforgeeks.org/themes-in-pysimplegui/
     font = ('Arial',15)
 
@@ -83,7 +92,7 @@ def signin_page(name, fileName, function_call,containers_to_unload,toLoad,unLoad
     [sg.Text('Name', font = font), sg.InputText(size=(50,10),expand_y = True)], #Text box for signing in
     [sg.Submit(), sg.Cancel()] #Submit button and hitting enter both submits the text
     ]
-
+    signedIn = True
     window = sg.Window('Sign In Page', layout)
     event, values = window.read()
     window.close()
@@ -305,6 +314,7 @@ def balancing_page(names,fileName):
     window.close()
 
 def success_page(names, fileName):
+    global uploaded
     sg.theme('LightGray1')
     font = ('Arial',30)
     shortenedfileName = copy.deepcopy(fileName)
@@ -322,7 +332,7 @@ def success_page(names, fileName):
     [sg.Text('',size = (0,5))],
     [sg.Button('Comments',size=(10,2),font = ('Arial',14)), sg.Button('Done',pad = (200,0),size = (10,2),font = ('Arial',14)),sg.Button('Login',size=(10,2),font = ('Arial',14))]
     ]
-
+    
     window = sg.Window('Balancing Page', layout, size=(900, 700),finalize = True)
     while True:
         event, values = window.read(timeout = 10)
@@ -336,6 +346,7 @@ def success_page(names, fileName):
             exit()
         elif event == 'Done':
             window.close()
+            uploaded = False
             main_page(names, '')
         window['time'].update(time.strftime('%H:%M:%S')) #Update clock in real time (Military time, local time)
 
