@@ -11,6 +11,7 @@ manifest_ship = []
 logfile = "Logfile_2022.txt" #temp var-- change to ask file name when program starts
 uploaded = False
 signedIn = False
+save_path = ''
 
 def writeToLog (fileName, comment):
     date = dt.datetime.now()
@@ -22,17 +23,20 @@ def writeToLog (fileName, comment):
 
 def start_page():
     global logfile
+    global save_path
     sg.theme('LightGray1')  #Can change theme https://www.geeksforgeeks.org/themes-in-pysimplegui/
     font = ('Arial',15)
 
     layout = [
-    [sg.Text('Enter log file name',font = font)],
-    [sg.Text('Log file name', font = font), sg.InputText(size=(50,10),expand_y = True)], #Text box for signing in
+    [sg.Text('Enter log file name and path to desktop',font = font)],
+    [sg.Text('Log File Name', font = font), sg.InputText(size=(50,10),expand_y = True)], 
+    [sg.Text('Manifest Save Path', font = font), sg.InputText(size=(50,10),expand_y = True)],#Text box for signing in
     [sg.Submit(), sg.Cancel()] #Submit button and hitting enter both submits the text
     ]
     window = sg.Window('Start Page', layout)
     event, values = window.read()
     logfile = values[0] + ".txt"
+    save_path = values[1]
     window.close()
     main_page('','')
     
@@ -262,7 +266,7 @@ def calculate_unload(names,fileName,toLoad,unLoad):
     finished_state = unload(initialState)
     shortenedfileName = copy.deepcopy(fileName)
     shortenedfileName = shortenedfileName[:-4]
-    writeManifest(shortenedfileName, finished_state.ship)
+    writeManifest(shortenedfileName, finished_state.ship,save_path)
     times = estimate_time(finished_state.moves)
     hours = math.floor(times/60)
     minutes = times % 60
@@ -303,7 +307,7 @@ def balancing_page(names,fileName):
     balanced_result = balance(initialState)
     shortenedfileName = copy.deepcopy(fileName)
     shortenedfileName = shortenedfileName[:-4]
-    writeManifest(shortenedfileName, balanced_result.ship)
+    writeManifest(shortenedfileName, balanced_result.ship,save_path)
     times = estimate_time(balanced_result.moves)
     hours = math.floor(times/60)
     minutes = times % 60
