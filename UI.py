@@ -183,7 +183,7 @@ def unloading_loading_page(names,fileName):
     #https://www.tutorialspoint.com/pysimplegui/pysimplegui_listbox_element.htm
     layout = [
     [sg.Text(fileName,font = font),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],
-    [sg.Text('',size = (0,3))],
+    [sg.Text('Select Containers to Unload',font = font,size = (0,1))],
     [lst],
     [sg.Text('',size = (0,3))],
     [sg.Button('Comments',size=(10,2),font = ('Arial',14)), sg.Button('Done',pad = (200,0),size = (10,2),font = ('Arial',14)),sg.Button('Login',size=(10,2),font = ('Arial',14))]
@@ -224,7 +224,7 @@ def load_page(names,fileName,containers_to_unload):
     [sg.Text('',size = (800,28))],
     [sg.Button('Comments',size=(10,2),font = ('Arial',14)), sg.Button('Done',pad = (200,0),size = (10,2),font = ('Arial',14)),sg.Button('Login',size=(10,2),font = ('Arial',14))]
     ]
-    window = sg.Window('Balancing Page', layout, size=(900, 700),finalize = True)
+    window = sg.Window('Load Page', layout, size=(900, 700),finalize = True)
 
     while True:
         event, values = window.read(timeout = 10)
@@ -260,7 +260,7 @@ def calculate_unload(names,fileName,toLoad,unLoad):
     [sg.Text('',size = (800,35))],
     [sg.Button('Comments',size=(10,2),font = ('Arial',14)), sg.Button('Done',pad = (200,0),size = (10,2),font = ('Arial',14)),sg.Button('Login',size=(10,2),font = ('Arial',14))]
     ]
-    window = sg.Window('Loading Unloading Page', layout, size=(900, 700),finalize = True)
+    window = sg.Window('Calculate Unload Page', layout, size=(900, 700),finalize = True)
     initialState = Node()
     initialState.ship = manifest_ship
     initialState.toLoad = toLoad
@@ -352,7 +352,7 @@ def success_page(names, fileName):
     [sg.Button('Comments',size=(10,2),font = ('Arial',14)), sg.Button('Done',pad = (200,0),size = (10,2),font = ('Arial',14)),sg.Button('Login',size=(10,2),font = ('Arial',14))]
     ]
     
-    window = sg.Window('Balancing Page', layout, size=(900, 700),finalize = True)
+    window = sg.Window('Success Page', layout, size=(900, 700),finalize = True)
     while True:
         event, values = window.read(timeout = 10)
         if event == 'Login': #Employee clicks Login button
