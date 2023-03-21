@@ -30,7 +30,7 @@ def start_page():
     layout = [
     [sg.Text('Enter log file name and path to desktop',font = font)],
     [sg.Text('Log File Name', font = font), sg.InputText(size=(50,10),expand_y = True)], 
-    [sg.Text('Manifest Save Path', font = font), sg.InputText(size=(50,10),expand_y = True)],#Text box for signing in
+    [sg.Text('Path to Desktop', font = font), sg.InputText(size=(50,10),expand_y = True)],#Text box for signing in
     [sg.Submit(), sg.Cancel()] #Submit button and hitting enter both submits the text
     ]
     window = sg.Window('Start Page', layout)
