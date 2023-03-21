@@ -322,6 +322,7 @@ def balance(initialState):
                 print(i)
             print("Solved")
             printShip(currState.ship)
+            repeatedStates.clear()
             return currState
         else:
             #expand node
@@ -452,8 +453,9 @@ def unload(initialState):
         if len(currState.toLoad) == 0 and len(currState.toUnload) == 0 and original_num_containers + original_to_Load - original_to_Unload == numContainers_on_ship(currState.ship):
 #             for i in currState.moves:
 #                 print(i)
-#             print("Answer:")
-#             printShip(currState.ship)
+            print("Answer:")
+            printShip(currState.ship)
+            repeatedStates.clear()
             return currState
         else:
             #expand node

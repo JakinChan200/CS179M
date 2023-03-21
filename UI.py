@@ -268,7 +268,6 @@ def calculate_unload(names,fileName,toLoad,unLoad):
     finished_state = unload(initialState)
     shortenedfileName = copy.deepcopy(fileName)
     shortenedfileName = shortenedfileName[:-4]
-    print(finished_state)
     writeManifest(shortenedfileName, finished_state.ship,save_path)
     times = estimate_time(finished_state.moves)
     hours = math.floor(times/60)
@@ -293,6 +292,7 @@ def calculate_unload(names,fileName,toLoad,unLoad):
 
 def balancing_page(names,fileName):
     global newname
+    global manifest_ship
     sg.theme('LightGray1')
     font = ('Arial',30)
 
