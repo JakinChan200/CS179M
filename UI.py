@@ -187,6 +187,7 @@ def load_page(names,fileName,containers_to_unload):
     [sg.Text('Name',size = (15,1),font = font),sg.InputText(key = 'input')],
     [sg.Text('Weight',size = (15,1),font = font),sg.InputText(key = 'input2')],
     [sg.Button('Add container',size = (10,1),font = ('Arial,14'))],
+    [sg.Text('',size = (800,28))],
     [sg.Button('Comments',size=(10,2),font = ('Arial',14)), sg.Button('Done',pad = (200,0),size = (10,2),font = ('Arial',14)),sg.Button('Login',size=(10,2),font = ('Arial',14))]
     ]
     window = sg.Window('Balancing Page', layout, size=(900, 700),finalize = True)
@@ -219,8 +220,10 @@ def calculate_unload(names,fileName,toLoad,unLoad):
     layout = [
     [sg.Text(fileName,font = font),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],
     [sg.Text('',size = (0,3))],
-    [sg.Text('Calculating Loading and Unloading of Ship',font = font, size = (0,3))],
-    [sg.Text('',size = (0,3))],
+#     [sg.Text('Calculating Loading and Unloading of Ship',font = font, size = (0,3))],
+    [sg.Text('Estimated Time (At Most):',font = font, size = (0,1))],
+    [sg.Text('',font = font, size = (800,1), key = 'estimation')],
+    [sg.Text('',size = (800,35))],
     [sg.Button('Comments',size=(10,2),font = ('Arial',14)), sg.Button('Done',pad = (200,0),size = (10,2),font = ('Arial',14)),sg.Button('Login',size=(10,2),font = ('Arial',14))]
     ]
     window = sg.Window('Loading Unloading Page', layout, size=(900, 700),finalize = True)
@@ -229,7 +232,12 @@ def calculate_unload(names,fileName,toLoad,unLoad):
     initialState.toLoad = toLoad
     initialState.toUnload = unLoad
     finished_state = unload(initialState)
-    writeManifest(fileName, finished_state.ship)
+    shortenedfileName = copy.deepcopy(fileName)
+    shortenedfileName = shortenedfileName[:-4]
+    writeManifest(shortenedfileName, finished_state.ship)
+    times = estimate_time(finished_state.moves)
+    hours = math.floor(times/60)
+    minutes = times % 60
     while True:
         event, values = window.read(timeout = 10)
         if event == 'Login': #Employee clicks Login button
@@ -244,6 +252,7 @@ def calculate_unload(names,fileName,toLoad,unLoad):
         elif event == sg.WIN_CLOSED: #Employee clicks the X on the program
             exit()
         window['time'].update(time.strftime('%H:%M:%S')) #Update clock in real time (Military time, local time)
+        window['estimation'].update(str(hours) + ' hours ' + str(minutes) + ' minutes' )
 
     window.close()
 
@@ -257,16 +266,18 @@ def balancing_page(names,fileName):
     [sg.Text(fileName,font = font),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],
     [sg.Text('',size = (0,3))],
 #     [sg.Text('Calculating Balance of Ship',font = font, size = (0,3))],
-    [sg.Text('Estimated Time:',font = font, size = (0,1))],
+    [sg.Text('Estimated Time (At Most):',font = font, size = (0,1))],
     [sg.Text('',font = font, size = (800,1), key = 'estimation')],
-    [sg.Text('',size = (0,3))],
+    [sg.Text('',size = (800,35))],
     [sg.Button('Comments',size=(10,2),font = ('Arial',14)), sg.Button('Done',pad = (200,0),size = (10,2),font = ('Arial',14)),sg.Button('Login',size=(10,2),font = ('Arial',14))]
     ]
     window = sg.Window('Balancing Page', layout, size=(900, 700),finalize = True)
     initialState = Node()
     initialState.ship = manifest_ship
     balanced_result = balance(initialState)
-    writeManifest(fileName, balanced_result.ship)
+    shortenedfileName = copy.deepcopy(fileName)
+    shortenedfileName = shortenedfileName[:-4]
+    writeManifest(shortenedfileName, balanced_result.ship)
     times = estimate_time(balanced_result.moves)
     hours = math.floor(times/60)
     minutes = times % 60
@@ -325,62 +336,47 @@ def success_page(names, fileName):
 
     window.close()
 
-def success_page(names, fileName):
-    sg.theme('LightGray1')
-    font = ('Arial',30)
-    fileName = fileName[:-4]
-    outboundFileName = fileName + '_OUTBOUND.txt'
-    print(outboundFileName)
-    layout = [
-    [sg.Text(fileName,font = font),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],
-    [sg.Text('',size = (0,5))],
-    [sg.Text('Success! No more moves to make.',size = (0,3), font = ('Arial 25'), pad = (210,0))],
-    [sg.Text('',size = (0,5))],
-    [sg.Text('Please email ' + outboundFileName + ' to the captain.',size = (0,3), font = ('Arial 25'),pad = (125,0))],
-    [sg.Text('',size = (0,5))],
-    [sg.Text(outboundFileName + ' is available on the Desktop.',size = (0,3), font = ('Arial 25'),pad = (150,0))],
-    [sg.Text('',size = (0,5))],
-    [sg.Button('Comments',size=(10,2),font = ('Arial',14)), sg.Button('Done',pad = (200,0),size = (10,2),font = ('Arial',14)),sg.Button('Login',size=(10,2),font = ('Arial',14))]
-    ]
-
 def moves_page(names,fileName, resultNode):
     sg.theme('LightGray1')
     font = ('Arial',30)
-    string_node_result = ','.join(str(move) for move in resultNode.moves) #(1,2,1,8) with parenthesis and commas
-    string_node_result = re.sub(" ", "", string_node_result)
-
-
-    list_of_moves = re.findall("-?\d+", string_node_result)
-
-    string_of_moves = ""
-    iteration = 1
-    for i in list_of_moves:
-        if iteration % 2 == 0:
-            string_of_moves += i + ")"
-            if iteration - 1 < len(list_of_moves)-1:
-                string_of_moves += "\n"
-        else:
-            string_of_moves += "(" + i + ", "
-        iteration += 1
-    string_of_instructions = ""
-    iteration = 1
-    for i in string_of_moves.split("\n"):
-        if iteration % 2 == 0:
-            string_of_instructions += " to " + i
-            if iteration - 1 < len(string_of_moves):
-                string_of_instructions += "\n"
-        else:
-            string_of_instructions += "Move " + i
-        iteration += 1
+    if len(resultNode.moves) != 0:   
+        string_node_result = ','.join(str(move) for move in resultNode.moves) #(1,2,1,8) with parenthesis and commas
+        string_node_result = re.sub(" ", "", string_node_result)
+    
+    
+        list_of_moves = re.findall("-?\d+", string_node_result)
+    
+        string_of_moves = ""
+        iteration = 1
+        for i in list_of_moves:
+            if iteration % 2 == 0:
+                string_of_moves += i + ")"
+                if iteration - 1 < len(list_of_moves)-1:
+                    string_of_moves += "\n"
+            else:
+                string_of_moves += "(" + i + ", "
+            iteration += 1
+        string_of_instructions = ""
+        iteration = 1
+        for i in string_of_moves.split("\n"):
+            if iteration % 2 == 0:
+                string_of_instructions += " to " + i
+                if iteration - 1 < len(string_of_moves):
+                    string_of_instructions += "\n"
+            else:
+                string_of_instructions += "Move " + i
+            iteration += 1
+    else:
+        string_of_instructions = "No Moves"
     layout = [
     [sg.Text(fileName,font = font),sg.Text('',font = font,pad = (200,0),key = 'time'),sg.Text(names,font = font,pad = ((20,0),(0,0)))],
-    [sg.Text(string_of_instructions,font = font)],
+    [sg.Text(string_of_instructions,font = font,size = (800,15))],
     # [sg.Text('',size = (0,3))],
     # [sg.Text('Calculating Balance of Ship',size = (0,3))],
     # [sg.Text('',size = (0,3))],
     [sg.Button('Comments',size=(10,2),font = ('Arial',14)), sg.Button('Done',pad = (200,0),size = (10,2),font = ('Arial',14)),sg.Button('Login',size=(10,2),font = ('Arial',14))]
     ]
-    window = sg.Window('Moves Page', layout, size=(900, 700),finalize = True)\
+    window = sg.Window('Moves Page', layout, size=(900, 700),finalize = True)
 
     while True:
         event, values = window.read(timeout = 10)
