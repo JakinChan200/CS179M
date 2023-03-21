@@ -1,9 +1,9 @@
 #import numpy
 import queue
 import heapq
-from dataclasses import dataclass, field
-from typing import Any
-from typing import NamedTuple
+# from dataclasses import dataclass, field
+# from typing import Any
+# from typing import NamedTuple
 import copy
 from readManifest import *
 
@@ -94,6 +94,28 @@ def printWeights(ship):
 #     buffer = numpy.empty([4, 24])
 
 #     print('Hello World')
+def estimate_time(moves):
+    time = 0
+    for set_of_moves in moves:
+        first_coordinates = (set_of_moves[0],set_of_moves[1])
+        second_coordinates = (set_of_moves[2],set_of_moves[3])
+        if set_of_moves[0] != -1 and set_of_moves[2] != -1: #No Truck involved
+            time += 13 - set_of_moves[0]
+            time += abs(set_of_moves[1] - set_of_moves[3])
+            time += 13 - set_of_moves[2]
+        elif set_of_moves[0] == -1: #From truck to Ship
+            time += 2
+            time += set_of_moves[3] - 1
+            time += 13 - set_of_moves[2]
+        elif set_of_moves[3] == -1: #From ship to truck
+            time += 13 - set_of_moves[0]
+            time += set_of_moves[1] - 1
+            time += 2
+    return time
+
+
+
+
 def is_solvable(initialState):
     sum = 0.0
     maxW = 0.0
@@ -206,7 +228,6 @@ def expandBalance(givenNode, heap, isSift):
                     # print(len(repeatedStates))
                     nodeToPush = copy.deepcopy(newNode)
                     nodeToPush.moves.append((topContainer.location[0], currNode.currColumn, tempLocation[0], tempLocation[1]))
-                    # if any(x == nodeToPush.ship for x in repeatedStates):#https://stackoverflow.com/questions/9371114/check-if-list-of-objects-contain-an-object-with-a-certain-attribute-value
                     if not exists(nodeToPush.ship):
                         if isSift:
                             nodeToPush.h_n = ComputeSIFTMisplacedTile(nodeToPush,SIFT(nodeToPush.ship))
@@ -299,6 +320,8 @@ def balance(initialState):
         if checkBalanceGoal(currState.ship):
             for i in currState.moves:
                 print(i)
+            print("Solved")
+            printShip(currState.ship)
             return currState
         else:
             #expand node
@@ -427,10 +450,10 @@ def unload(initialState):
         # print()
         # print("G_n + H_N", currState.g_n + currState.h_n)
         if len(currState.toLoad) == 0 and len(currState.toUnload) == 0 and original_num_containers + original_to_Load - original_to_Unload == numContainers_on_ship(currState.ship):
-            for i in currState.moves:
-                print(i)
-            print("Answer:")
-            printShip(currState.ship)
+#             for i in currState.moves:
+#                 print(i)
+#             print("Answer:")
+#             printShip(currState.ship)
             return currState
         else:
             #expand node
@@ -444,6 +467,21 @@ def unload(initialState):
 #         ship.append(Container((i,j),0,'UNUSED'))
 #         j+=1
 #     i+=1
+
+# 
+# ship = openFile()
+# initialState = Node()
+# initialState.ship = ship
+# initialState.toLoad = [Container((0,0),2,'Liz')]
+# initialState.toUnload = ['Cat','Dog']
+# print("Original:")
+# printShip(ship)
+# heap = []
+# heapq.heapify(heap)
+# heapq.heappush(heap,initialState)
+# repeatedStates.append(initialState.ship)
+# solved = balance(initialState)
+# print(estimate_time(solved.moves))
 
 # ship[0] = Container((1,1),10,'Bob')
 # ship[12] = Container((2,1),20,'Bob2')
