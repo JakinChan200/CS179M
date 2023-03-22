@@ -362,6 +362,24 @@ def expandUnload(givenNode, heap):
         currNode = copy.deepcopy(givenNode)
         currNode.g_n = currNode.g_n + 1
         currNode.currColumn = column
+        if len(currNode.toUnload) == 0:
+            loadNode = copy.deepcopy(currNode)
+            if len(loadNode.toLoad) > 0:
+                toLoadContainer = loadNode.toLoad.pop()
+                locationForLoad = return_left_most_empty_column_location(loadNode)
+                loadNode.ship[(locationForLoad[0] - 1)* maxCol + (locationForLoad[1] - 1)].name = toLoadContainer.name
+                loadNode.ship[(locationForLoad[0] - 1)* maxCol + (locationForLoad[1] - 1)].weight = toLoadContainer.weight
+                loadNode.moves.append((-1, -1, locationForLoad[0], locationForLoad[1]))
+            if not exists(loadNode.ship):
+
+                for containerToUnload in loadNode.toLoad:
+                    if containerToUnload == loadNode.currContainer.name:
+                        loadNode.toUnload.remove(containerToUnload)
+
+                loadNode.currContainer = emptyContainer
+                heapq.heappush(heap,loadNode)
+                repeatedStates.append(loadNode.ship)
+            
         if currNode.currContainer.location == (-1,-1): #need to pick up
             topContainer = return_top_container(currNode,currNode.currColumn)
             if topContainer.name != 'NAN' or topContainer.name != 'UNUSED': #if container is found

@@ -373,7 +373,6 @@ def success_page(names, fileName):
     window.close()
 
 def moves_page(names,fileName, resultNode):
-    global moves
     sg.theme('LightGray1')
     font = ('Arial',30)
     curr_move = 0
