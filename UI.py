@@ -123,28 +123,37 @@ def signin_page(name, fileName, function_call,containers_to_unload,toLoad,unLoad
     signedIn = True
     window = sg.Window('Sign In Page', layout)
     event, values = window.read()
+    
+
     window.close()
     loginName = values[0] + " signs in"
     writeToLog(logfile, loginName)
-    if function_call == 'main':
-        newname = values[0]
-        main_page(values[0],fileName) #Open the main page after closing the sign in page, passing in the name typed in as argument
-    elif function_call == 'load unload':
-        newname = values[0]
-        unloading_loading_page(values[0],fileName)
-    elif function_call == 'balance':
-        newname = values[0]
-    elif function_call == 'calculate unload':
-        newname = values[0]
-    elif function_call == 'moves':
-        newname = values[0]
-    elif function_call == 'load page':
-        newname = values[0]
-        load_page(values[0],fileName,containers_to_unload)
-    elif function_call == 'success':
-        newname = values[0]
-
-
+    if event != 'Cancel':
+        if function_call == 'main':
+            newname = values[0]
+            main_page(values[0],fileName) #Open the main page after closing the sign in page, passing in the name typed in as argument
+        elif function_call == 'load unload':
+            newname = values[0]
+            unloading_loading_page(values[0],fileName)
+        elif function_call == 'balance':
+            newname = values[0]
+        elif function_call == 'calculate unload':
+            newname = values[0]
+        elif function_call == 'moves':
+            newname = values[0]
+        elif function_call == 'load page':
+            newname = values[0]
+            load_page(values[0],fileName,containers_to_unload)
+        elif function_call == 'success':
+            newname = values[0]
+    else:
+        if function_call == 'main':
+            main_page(name,fileName)
+        elif function_call == 'load unload':
+            unloading_loading_page(name,fileName)
+        elif function_call == 'load page':
+            load_page(name,fileName,containers_to_unload)
+            
 def comments_page(name, fileName,function_call,containers_to_unload,toLoad,unLoad,resultNode): #function_call tells which function is calling this function
     sg.theme('LightGray1')  #Can change theme https://www.geeksforgeeks.org/themes-in-pysimplegui/
     font = ('Arial',15)
